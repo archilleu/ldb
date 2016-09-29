@@ -38,14 +38,23 @@ template<typename T, typename Y>    using Hash  = std::unordered_map<T, Y>;
 class Object
 {
 public:
-    Object(short t=TYPE_INVALID):type_(t){}
+    Object(short t, std::shared_ptr<void>&& o)
+    :   type_(t),
+        obj_(o)
+    {}
+    Object(const Object&) =delete;
+    Object(const Object&&) =delete;
+    Object& operator=(const Object&) =delete;
+    Object& operator=(Object&&) =delete;
 
     short type() { return type_; }
 
-    std::shared_ptr<void> obj_;
+    const std::shared_ptr<void>& obj() const { return obj_; }
+    std::shared_ptr<void>& obj() { return obj_; }
 
 private:
     short type_;
+    std::shared_ptr<void> obj_;
 };
 using ObjectPtr = std::shared_ptr<Object>;
 

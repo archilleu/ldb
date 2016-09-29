@@ -50,6 +50,7 @@ bool TestLdb::TestNormal()
 
     const ObjectPtr& coval_null = ldb.ObjectGet("invalid");
     ObjectPtr& oval_null = ldb.ObjectGet("invalid");
+    *reinterpret_cast<int*>((oval_null->obj().get())) = 2;
     MY_ASSERT(coval_null == Ldb::kNullObject);
     MY_ASSERT(oval_null == Ldb::kNullObject);
     ObjectPtr null;
