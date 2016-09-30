@@ -4,10 +4,6 @@
 //---------------------------------------------------------------------------
 #include <vector>
 #include <string>
-#include <list>
-#include <unordered_set>
-#include <map>
-#include <unordered_map>
 #include <memory>
 //---------------------------------------------------------------------------
 namespace db
@@ -27,12 +23,8 @@ const short TYPE_ZSET   = 9;
 const short TYPE_HASH   = 10;
 
 //data type alias
-                                    using Binary= std::vector<unsigned char>;
-                                    using String= std::string;
-template<typename T>                using List  = std::list<T>;
-template<typename T>                using Set   = std::unordered_set<T>;
-template<typename T, typename Y>    using ZSet  = std::map<T, Y>;
-template<typename T, typename Y>    using Hash  = std::unordered_map<T, Y>;
+using Binary = std::vector<unsigned char>;
+using String = std::string;
 
 //data object
 class Object

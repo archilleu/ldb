@@ -32,6 +32,14 @@ public:
     bool UnaryGetBinary (const String& key, Binary* val);
     bool UnaryGetString (const String& key, String* val);
 
+    //list method
+    const List<Object>& ListGet(const String& key) const;
+    List<Object>& ListGet(const String& key);
+
+    //void ListPush(const List<Object>& list, 
+
+    ///normal method
+    //get
     const ObjectPtr& ObjectGet(const String& key) const
     {
         const auto iter = dict_.find(key);
@@ -40,6 +48,7 @@ public:
 
         return iter->second;
     }
+
     ObjectPtr& ObjectGet(const String& key)
     {
         auto iter = dict_.find(key);
@@ -47,6 +56,12 @@ public:
             return kNullObject;
 
         return iter->second;
+    }
+
+    //exist
+    bool KeyExist(const String& key)
+    {
+        return dict_.end() != dict_.find(key);
     }
 
     //data db number

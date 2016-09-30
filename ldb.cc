@@ -45,7 +45,7 @@ bool Ldb::UnarySetBinary(const String& key, const Binary& val)
 //---------------------------------------------------------------------------
 bool Ldb::UnarySetBinary(const String& key, Binary&& val)
 {
-    ObjectPtr obj_val = std::make_shared<Object>(TYPE_BINARY, std::make_shared<Binary>(val));
+    ObjectPtr obj_val = std::make_shared<Object>(TYPE_BINARY, std::make_shared<Binary>(std::move(val)));
 
     return UnarySet(key, obj_val);
 }
@@ -59,7 +59,7 @@ bool Ldb::UnarySetString(const String& key, const String& val)
 //---------------------------------------------------------------------------
 bool Ldb::UnarySetString(const String& key, String&& val)
 {
-    ObjectPtr obj_val = std::make_shared<Object>(TYPE_STRING, std::make_shared<String>(val));
+    ObjectPtr obj_val = std::make_shared<Object>(TYPE_STRING, std::make_shared<String>(std::move(val)));
 
     return UnarySet(key, obj_val);
 }
