@@ -4,7 +4,7 @@
 namespace db
 {
 //---------------------------------------------------------------------------
-inline void Object::SetBoolean(bool val)
+void Object::SetBoolean(bool val)
 {
     assert(TYPE_BOOLEAN == type_);
 
@@ -16,7 +16,7 @@ inline void Object::SetBoolean(bool val)
     return;
 }
 //---------------------------------------------------------------------------
-inline void Object::SetInt(int64_t val)
+void Object::SetInt(int64_t val)
 {
     assert(TYPE_INT == type_);
 
@@ -28,7 +28,7 @@ inline void Object::SetInt(int64_t val)
     return;
 }
 //---------------------------------------------------------------------------
-inline void Object::SetUInt(uint64_t val)
+void Object::SetUInt(uint64_t val)
 {
     assert(TYPE_UINT == type_);
 
@@ -40,7 +40,7 @@ inline void Object::SetUInt(uint64_t val)
     return;
 }
 //---------------------------------------------------------------------------
-inline void Object::SetFloat(double val)
+void Object::SetFloat(double val)
 {
     assert(TYPE_FLOAT == type_);
 
@@ -52,8 +52,7 @@ inline void Object::SetFloat(double val)
     return;
 }
 //---------------------------------------------------------------------------
-
-inline void Object::SetBinary(const Binary& val)
+void Object::SetBinary(const Binary& val)
 {
     assert(TYPE_BINARY == type_);
 
@@ -65,7 +64,7 @@ inline void Object::SetBinary(const Binary& val)
     return;
 }
 //---------------------------------------------------------------------------
-inline void Object::SetBinary(Binary&& val)
+void Object::SetBinary(Binary&& val)
 {
     assert(TYPE_BINARY == type_);
 
@@ -77,7 +76,7 @@ inline void Object::SetBinary(Binary&& val)
     return;
 }
 //---------------------------------------------------------------------------
-inline void Object::SetString(const String& val)
+void Object::SetString(const String& val)
 {
     assert(TYPE_STRING == type_);
 
@@ -89,7 +88,7 @@ inline void Object::SetString(const String& val)
     return;
 }
 //---------------------------------------------------------------------------
-inline void Object::SetString(String&& val)
+void Object::SetString(String&& val)
 {
     assert(TYPE_STRING == type_);
 
@@ -101,7 +100,7 @@ inline void Object::SetString(String&& val)
     return;
 }
 //---------------------------------------------------------------------------
-inline void Object::SetList(const List& val)
+void Object::SetList(const List& val)
 {
     assert(TYPE_LIST == type_);
 
@@ -113,7 +112,7 @@ inline void Object::SetList(const List& val)
     return;
 }
 //---------------------------------------------------------------------------
-inline void Object::SetList(List&& val)
+void Object::SetList(List&& val)
 {
     assert(TYPE_LIST == type_);
 
@@ -125,7 +124,7 @@ inline void Object::SetList(List&& val)
     return;
 }
 //---------------------------------------------------------------------------
-inline void Object::SetSet(const Set& val)
+void Object::SetSet(const Set& val)
 {
     assert(TYPE_SET == type_);
 
@@ -137,7 +136,7 @@ inline void Object::SetSet(const Set& val)
     return;
 }
 //---------------------------------------------------------------------------
-inline void Object::SetSet(Set&& val)
+void Object::SetSet(Set&& val)
 {
     assert(TYPE_SET == type_);
 
@@ -149,7 +148,7 @@ inline void Object::SetSet(Set&& val)
     return;
 }
 //---------------------------------------------------------------------------
-inline void Object::SetZSet(const ZSet& val)
+void Object::SetZSet(const ZSet& val)
 {
     assert(TYPE_ZSET == type_);
 
@@ -161,7 +160,7 @@ inline void Object::SetZSet(const ZSet& val)
     return;
 }
 //---------------------------------------------------------------------------
-inline void Object::SetZSet(ZSet&& val)
+void Object::SetZSet(ZSet&& val)
 {
     assert(TYPE_ZSET == type_);
 
@@ -173,7 +172,7 @@ inline void Object::SetZSet(ZSet&& val)
     return;
 }
 //---------------------------------------------------------------------------
-inline void Object::SetHash(const Hash& val)
+void Object::SetHash(const Hash& val)
 {
     assert(TYPE_HASH == type_);
 
@@ -185,7 +184,7 @@ inline void Object::SetHash(const Hash& val)
     return;
 }
 //---------------------------------------------------------------------------
-inline void Object::SetHash(Hash&& val)
+void Object::SetHash(Hash&& val)
 {
     assert(TYPE_HASH == type_);
 
@@ -197,7 +196,7 @@ inline void Object::SetHash(Hash&& val)
     return;
 }
 //---------------------------------------------------------------------------
-inline std::size_t HashFunc::operator()(const Object& obj) const
+std::size_t HashFunc::operator()(const Object& obj) const
 {
     switch(obj.type())
     {
@@ -267,7 +266,7 @@ inline std::size_t HashFunc::operator()(const Object& obj) const
     }
 }
 //---------------------------------------------------------------------------
-inline bool EqualFunc::operator()(const Object& left, const Object& right)
+bool EqualFunc::operator()(const Object& left, const Object& right)
 {
     if(left.type() == right.type())
     {

@@ -33,13 +33,13 @@ class Object;
 //hash function(for Set)
 struct HashFunc
 {
-    inline std::size_t operator()(const Object& obj) const;
+    std::size_t operator()(const Object& obj) const;
 };
 
 //equal function(for Set)
 struct EqualFunc
 {
-    inline bool operator()(const Object& left, const Object& right);
+    bool operator()(const Object& left, const Object& right);
 };
 
 //data type alias
@@ -83,55 +83,55 @@ public:
     Object(Object&& o) { *this = std::move(o); }
 
     Object& operator=(const Object& o){ type_=o.type_; obj_=o.obj_; return *this; }
-    Object& operator=(Object&& o){ type_=o.type_; obj_=std::move(o.obj_); o.type_=TYPE_INVALID; o.obj_ = nullptr; return *this; }
+    Object& operator=(Object&& o){ type_=o.type_; obj_=std::move(o.obj_); o.type_=TYPE_INVALID; o.obj_=nullptr; return *this; }
 
     //Set method
-    inline void SetBoolean(bool val);
-    inline void SetInt(int64_t val);
-    inline void SetUInt(uint64_t val);
-    inline void SetFloat(double val);
+    void SetBoolean(bool val);
+    void SetInt(int64_t val);
+    void SetUInt(uint64_t val);
+    void SetFloat(double val);
 
-    inline void SetBinary(const Binary& val);
-    inline void SetBinary(Binary&& val);
+    void SetBinary(const Binary& val);
+    void SetBinary(Binary&& val);
 
-    inline void SetString(const String& val);
-    inline void SetString(String&& val);
+    void SetString(const String& val);
+    void SetString(String&& val);
 
-    inline void SetList(const List& val);
-    inline void SetList(List&& val);
+    void SetList(const List& val);
+    void SetList(List&& val);
 
-    inline void SetSet(const Set& val);
-    inline void SetSet(Set&& val);
+    void SetSet(const Set& val);
+    void SetSet(Set&& val);
 
-    inline void SetZSet(const ZSet& val);
-    inline void SetZSet(ZSet&& val);
+    void SetZSet(const ZSet& val);
+    void SetZSet(ZSet&& val);
 
-    inline void SetHash(const Hash& val);
-    inline void SetHash(Hash&& val);
+    void SetHash(const Hash& val);
+    void SetHash(Hash&& val);
 
     //Get method
-    inline bool GetBoolean() { assert(TYPE_BOOLEAN); return *std::static_pointer_cast<bool>(obj_); }
-    inline int64_t GetInt() { assert(TYPE_INT); return *std::static_pointer_cast<int64_t>(obj_); }
-    inline uint64_t GetUInt() { assert(TYPE_UINT); return *std::static_pointer_cast<uint64_t>(obj_); }
-    inline double GetFloat() { assert(TYPE_FLOAT); return *std::static_pointer_cast<double>(obj_); }
+    bool GetBoolean() { assert(TYPE_BOOLEAN); return *std::static_pointer_cast<bool>(obj_); }
+    int64_t GetInt() { assert(TYPE_INT); return *std::static_pointer_cast<int64_t>(obj_); }
+    uint64_t GetUInt() { assert(TYPE_UINT); return *std::static_pointer_cast<uint64_t>(obj_); }
+    double GetFloat() { assert(TYPE_FLOAT); return *std::static_pointer_cast<double>(obj_); }
 
-    inline const Binary& GetBinary() const { assert(TYPE_BINARY); return *std::static_pointer_cast<Binary>(obj_); }
-    inline Binary& GetBinary() { assert(TYPE_BINARY); return *std::static_pointer_cast<Binary>(obj_); }
+    const Binary& GetBinary() const { assert(TYPE_BINARY); return *std::static_pointer_cast<Binary>(obj_); }
+    Binary& GetBinary() { assert(TYPE_BINARY); return *std::static_pointer_cast<Binary>(obj_); }
 
-    inline const String& GetString() const { assert(TYPE_STRING); return *std::static_pointer_cast<String>(obj_); }
-    inline String& GetString() { assert(TYPE_STRING); return *std::static_pointer_cast<String>(obj_); }
+    const String& GetString() const { assert(TYPE_STRING); return *std::static_pointer_cast<String>(obj_); }
+    String& GetString() { assert(TYPE_STRING); return *std::static_pointer_cast<String>(obj_); }
 
-    inline const List& GetList() const { assert(TYPE_LIST); return *std::static_pointer_cast<List>(obj_); }
-    inline List& GetList() { assert(TYPE_LIST); return *std::static_pointer_cast<List>(obj_); }
+    const List& GetList() const { assert(TYPE_LIST); return *std::static_pointer_cast<List>(obj_); }
+    List& GetList() { assert(TYPE_LIST); return *std::static_pointer_cast<List>(obj_); }
 
-    inline const Set& GetSet() const { assert(TYPE_SET); return *std::static_pointer_cast<Set>(obj_); }
-    inline Set& GetSet() { assert(TYPE_SET); return *std::static_pointer_cast<Set>(obj_); }
+    const Set& GetSet() const { assert(TYPE_SET); return *std::static_pointer_cast<Set>(obj_); }
+    Set& GetSet() { assert(TYPE_SET); return *std::static_pointer_cast<Set>(obj_); }
 
-    inline const ZSet& GetZSet() const { assert(TYPE_ZSET); return *std::static_pointer_cast<ZSet>(obj_); }
-    inline ZSet& GetZSet() { assert(TYPE_ZSET); return *std::static_pointer_cast<ZSet>(obj_); }
+    const ZSet& GetZSet() const { assert(TYPE_ZSET); return *std::static_pointer_cast<ZSet>(obj_); }
+    ZSet& GetZSet() { assert(TYPE_ZSET); return *std::static_pointer_cast<ZSet>(obj_); }
 
-    inline const Hash& GetHash() const { assert(TYPE_HASH); return *std::static_pointer_cast<Hash>(obj_); }
-    inline Hash& GetHash() { assert(TYPE_HASH); return *std::static_pointer_cast<Hash>(obj_); }
+    const Hash& GetHash() const { assert(TYPE_HASH); return *std::static_pointer_cast<Hash>(obj_); }
+    Hash& GetHash() { assert(TYPE_HASH); return *std::static_pointer_cast<Hash>(obj_); }
 
     //normal method
     short type() const { return type_; }
