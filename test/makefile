@@ -29,11 +29,11 @@ all:$(TARGET_NAME)
 %.o: %.cc
 	$(CXX) $(CXX_FLAGS) $(INCLUDE_PATH) -c $<
 
-ldb.o : ../ldb.cc
-	$(CXX) $(CXX_FLAGS) -c ../ldb.cc
+#ldb.o : ../ldb.cc
+	#$(CXX) $(CXX_FLAGS) -c ../ldb.cc
 
-$(TARGET_NAME):$(OBJS) ldb.o
-	$(CXX) $(OBJS) ldb.o -o $(TARGET_NAME) $(SHARE_LIP_PATH) $(SHARE_LIB) $(PUBLIC_SHARE_LIB)
+$(TARGET_NAME):$(OBJS)
+	$(CXX) $(OBJS) -o $(TARGET_NAME) $(SHARE_LIP_PATH) $(SHARE_LIB) $(PUBLIC_SHARE_LIB)
 
 .PHONY:clean
 clean:

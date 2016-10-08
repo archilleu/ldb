@@ -1,20 +1,34 @@
 //---------------------------------------------------------------------------
-#ifndef DB_HASH_H_
-#define DB_HASH_H_
+#ifndef DB_TEST_TYPE_H_
+#define DB_TEST_TYPE_H_
 //---------------------------------------------------------------------------
-#include <unordered_map>
-#include "type.h"
+#include "test_base.h"
 //---------------------------------------------------------------------------
 namespace db 
 {
 
-class Hash 
+namespace test
+{
+
+class TestType : public TestBase
 {
 public:
+    TestType()
+    {
+    }
+
+    virtual ~TestType()
+    {
+    }
+
+    virtual bool DoTest();
 
 private:
+    bool TestNormal();
 };
 
-}// namespace db
+}// namespace test
+
+}//namespace db
 //---------------------------------------------------------------------------
-#endif //DB_HASH_H_
+#endif// DB_TEST_TYPE_H_
