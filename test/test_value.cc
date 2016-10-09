@@ -15,7 +15,12 @@ namespace test
 
 //---------------------------------------------------------------------------
 template<typename T>
-static void PrintContainer(const T& val)
+static void PrintContainer1(const T& val);
+template<typename T>
+static void PrintContainer2(const T& val);
+//---------------------------------------------------------------------------
+template<typename T>
+static void PrintContainer1(const T& val)
 {
     std::cout << "[ ";
     for(auto iter : val)
@@ -51,11 +56,11 @@ static void PrintContainer(const T& val)
                 break;
 
             case Value::TYPE_LIST:
-                PrintContainer(iter.GetList());
+                PrintContainer1(iter.GetList());
                 break;
 
             case Value::TYPE_SET:
-                PrintContainer(iter.GetSet());
+                PrintContainer1(iter.GetSet());
                 break;
 
             case Value::TYPE_ZSET:
@@ -107,11 +112,11 @@ static void PrintValue(const Value& val)
             break;
 
         case Value::TYPE_LIST:
-            PrintContainer(val.GetList());
+            PrintContainer1(val.GetList());
             break;
 
         case Value::TYPE_SET:
-            PrintContainer(val.GetSet());
+            PrintContainer1(val.GetSet());
             break;
 
         case Value::TYPE_ZSET:
@@ -152,10 +157,12 @@ bool TestValue::TestInvaild()
     MY_ASSERT(o.obj() == p);
 
     Value oc(o);
+    MY_ASSERT(oc == o);
     MY_ASSERT(oc.type() == Value::TYPE_INVALID);
     MY_ASSERT(oc.obj() == p);
 
     Value om(std::move(o));
+    MY_ASSERT(om == o);
     MY_ASSERT(om.type() == Value::TYPE_INVALID);
     MY_ASSERT(om.obj() == p);
 
@@ -179,12 +186,14 @@ bool TestValue::TestBoolean()
     MY_ASSERT(o.type() == Value::TYPE_BOOLEAN);
 
     Value oc(o);
+    MY_ASSERT(oc == o);
     MY_ASSERT(false == oc.GetBoolean());
     MY_ASSERT(oc.type() == Value::TYPE_BOOLEAN);
     oc.SetBoolean(true);
     MY_ASSERT(true == oc.GetBoolean());
 
     Value om(std::move(o));
+    MY_ASSERT(oc != o);
     MY_ASSERT(om.type() == Value::TYPE_BOOLEAN); MY_ASSERT(false == om.GetBoolean());
     om.SetBoolean(true);
     MY_ASSERT(true== om.GetBoolean());
@@ -206,12 +215,14 @@ bool TestValue::TestInt()
     Value o(v);
     MY_ASSERT(o.type() == Value::TYPE_INT);
     MY_ASSERT(LONG_LONG_MAX == o.GetInt());
+    MY_ASSERT(Value(int64_t(1)) != o);
 
     o.SetInt(1);
     MY_ASSERT(1 == o.GetInt());
     MY_ASSERT(o.type() == Value::TYPE_INT);
 
     Value oc(o);
+    MY_ASSERT(oc == o);
     MY_ASSERT(1 == oc.GetInt());
     MY_ASSERT(oc.type() == Value::TYPE_INT);
     oc.SetInt(1);
@@ -239,12 +250,15 @@ bool TestValue::TestUInt()
     Value o(v);
     MY_ASSERT(o.type() == Value::TYPE_UINT);
     MY_ASSERT(ULONG_LONG_MAX == o.GetUInt());
+    MY_ASSERT(Value(int64_t(1)) != o);
+
 
     o.SetUInt(1);
     MY_ASSERT(1 == o.GetUInt());
     MY_ASSERT(o.type() == Value::TYPE_UINT);
 
     Value oc(o);
+    MY_ASSERT(oc == o);
     MY_ASSERT(1 == oc.GetUInt());
     MY_ASSERT(oc.type() == Value::TYPE_UINT);
     o.SetUInt(1);
@@ -252,6 +266,7 @@ bool TestValue::TestUInt()
     MY_ASSERT(oc.type() == Value::TYPE_UINT);
 
     Value om(std::move(o));
+    MY_ASSERT(oc != o);
     MY_ASSERT(om.type() == Value::TYPE_UINT);
     MY_ASSERT(1 == om.GetUInt());
     MY_ASSERT(om.obj().unique());
@@ -274,6 +289,7 @@ bool TestValue::TestFloat()
     double diff = o.GetFloat() - v;
     diff = abs(static_cast<int>(diff));
     MY_ASSERT(0 == diff);
+    MY_ASSERT(Value(1.0f) != o);
 
     o.SetFloat(1.0);
     diff = o.GetFloat() - 1.0;
@@ -282,6 +298,7 @@ bool TestValue::TestFloat()
     MY_ASSERT(o.type() == Value::TYPE_FLOAT);
 
     Value oc(o);
+    MY_ASSERT(oc == o);
     oc.SetFloat(1.0);
     diff = oc.GetFloat() - 1.0;
     diff = abs(static_cast<int>(diff));
@@ -289,6 +306,7 @@ bool TestValue::TestFloat()
     MY_ASSERT(oc.type() == Value::TYPE_FLOAT);
 
     Value om(std::move(o));
+    MY_ASSERT(oc != o);
     diff = om.GetFloat() - 1.0;
     diff = abs(static_cast<int>(diff));
     MY_ASSERT(0 == diff);
@@ -318,6 +336,7 @@ bool TestValue::TestBinary()
     o.SetBinary(bin2);
     MY_ASSERT(bin2 == o.GetBinary());
     MY_ASSERT(o.type() == Value::TYPE_BINARY);
+    MY_ASSERT(Value(bin1) != o);
 
     Value o1(Value::Binary(size, 'a'));
     MY_ASSERT(o1.type() == Value::TYPE_BINARY);
@@ -328,6 +347,7 @@ bool TestValue::TestBinary()
     MY_ASSERT(o1.type() == Value::TYPE_BINARY);
 
     Value oc(o);
+    MY_ASSERT(oc == o);
     MY_ASSERT(false == oc.obj().unique());
     MY_ASSERT(oc.type() == Value::TYPE_BINARY);
     MY_ASSERT(bin2 == oc.GetBinary());
@@ -336,6 +356,7 @@ bool TestValue::TestBinary()
     MY_ASSERT(oc.type() == Value::TYPE_BINARY);
 
     Value om(std::move(o));
+    MY_ASSERT(oc != o);
     MY_ASSERT(om.obj().unique());
     MY_ASSERT(om.type() == Value::TYPE_BINARY);
     MY_ASSERT(bin2 == om.GetBinary());
@@ -363,6 +384,7 @@ bool TestValue::TestString()
     MY_ASSERT(o.SetString(str2));
     MY_ASSERT(str2 == o.GetString());
     MY_ASSERT(o.type() == Value::TYPE_STRING);
+    MY_ASSERT(Value(str1) != o);
 
     Value o1(Value::String(size, 'a'));
     MY_ASSERT(o1.type() == Value::TYPE_STRING);
@@ -372,6 +394,7 @@ bool TestValue::TestString()
     MY_ASSERT(o1.type() == Value::TYPE_STRING);
 
     Value oc(o);
+    MY_ASSERT(oc == o);
     MY_ASSERT(false == oc.obj().unique());
     MY_ASSERT(oc.type() == Value::TYPE_STRING);
     MY_ASSERT(str2 == oc.GetString());
@@ -380,6 +403,7 @@ bool TestValue::TestString()
     MY_ASSERT(oc.type() == Value::TYPE_STRING);
 
     Value om(std::move(o));
+    MY_ASSERT(oc != o);
     MY_ASSERT(om.obj().unique());
     MY_ASSERT(om.type() == Value::TYPE_STRING);
     MY_ASSERT(str2 == om.GetString());
@@ -406,6 +430,7 @@ bool TestValue::TestList()
     MY_ASSERT(o.SetList(list2));
     MY_ASSERT(list2 == o.GetList());
     MY_ASSERT(o.type() == Value::TYPE_LIST);
+    MY_ASSERT(Value(list1) != o);
 
     Value o1(Value::List(size, Value(true)));
     MY_ASSERT(o1.type() == Value::TYPE_LIST);
@@ -415,6 +440,7 @@ bool TestValue::TestList()
     MY_ASSERT(o1.type() == Value::TYPE_LIST);
 
     Value oc(o);
+    MY_ASSERT(oc == o);
     MY_ASSERT(false == oc.obj().unique());
     MY_ASSERT(oc.type() == Value::TYPE_LIST);
     MY_ASSERT(list2 == oc.GetList());
@@ -423,6 +449,7 @@ bool TestValue::TestList()
     MY_ASSERT(oc.type() == Value::TYPE_LIST);
 
     Value om(std::move(o));
+    MY_ASSERT(oc != o);
     MY_ASSERT(om.obj().unique());
     MY_ASSERT(om.type() == Value::TYPE_LIST);
     MY_ASSERT(list2 == om.GetList());

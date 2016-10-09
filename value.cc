@@ -358,7 +358,9 @@ bool Value::SetHash(Hash&& val)
 }
 //---------------------------------------------------------------------------
 template<typename T>
-bool CompContainer2(const T& left, const T& right);
+static bool CompContainer1(const T& left, const T& right);
+template<typename T>
+static bool CompContainer2(const T& left, const T& right);
 //---------------------------------------------------------------------------
 template<typename T>
 static bool CompContainer1(const T& left, const T& right)
@@ -398,7 +400,7 @@ static bool CompContainer1(const T& left, const T& right)
                 break;
 
             case Value::TYPE_FLOAT:
-                if(l->GetFloat() != r->GetFloat())
+                if(0 != static_cast<int>(l->GetFloat()-r->GetFloat()))
                     return false;
 
                 break;
@@ -449,7 +451,7 @@ static bool CompContainer1(const T& left, const T& right)
 }
 //---------------------------------------------------------------------------
 template<typename T>
-bool CompContainer2(const T& left, const T& right)
+static bool CompContainer2(const T& left, const T& right)
 {
     if(left.size() != right.size())
         return false;
@@ -489,7 +491,7 @@ bool CompContainer2(const T& left, const T& right)
                 break;
 
             case Value::TYPE_FLOAT:
-                if(l->second.GetFloat() != r->second.GetFloat())
+                if(0 != static_cast<int>(l->second.GetFloat()-r->second.GetFloat()))
                     return false;
 
                 break;
@@ -558,7 +560,7 @@ bool operator==(const Value& left, const Value& right)
             return (left.GetUInt() == right.GetUInt());
 
         case Value::TYPE_FLOAT:
-            return (left.GetFloat() == right.GetFloat());
+            return (0 != static_cast<int>(left.GetFloat() - right.GetFloat()));
 
         case Value::TYPE_BINARY:
             return (0 == memcmp(left.GetBinary().data(), right.GetBinary().data(), left.GetBinary().size()));
@@ -584,6 +586,11 @@ bool operator==(const Value& left, const Value& right)
         }
 
     return true;
+}
+//---------------------------------------------------------------------------
+bool operator!=(const Value& left, const Value& right)
+{
+    return !(left==right);
 }
 //---------------------------------------------------------------------------
 }//namespace db

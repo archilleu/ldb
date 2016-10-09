@@ -143,6 +143,7 @@ public:
 
     //operator overload
     friend bool operator==(const Value& left, const Value& right);
+    friend bool operator!=(const Value& left, const Value& right);
 
 private:
     short type_;
