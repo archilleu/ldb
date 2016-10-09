@@ -1,7 +1,7 @@
 //---------------------------------------------------------------------------
 #include "test_main.h"
 #include "test_base.h"
-#include "test_type.h"
+#include "test_value.h"
 #include "test_ldb.h"
 #include <iostream>
 //---------------------------------------------------------------------------
@@ -12,7 +12,7 @@ TestMain::TestMain()
 {
 #define TEST_ADD(TypeName)   test_obj_list_[#TypeName]=std::shared_ptr<TestBase>(dynamic_cast<TestBase*>(new TypeName))
 
-    TEST_ADD(TestType);
+    TEST_ADD(TestValue);
     //TEST_ADD(TestLdb);
 
 #undef TEST_ADD

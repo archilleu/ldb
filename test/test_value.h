@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------
-#ifndef DB_TEST_TYPE_H_
-#define DB_TEST_TYPE_H_
+#ifndef DB_TEST_VALUE_H_
+#define DB_TEST_VALUE_H_
 //---------------------------------------------------------------------------
 #include "test_base.h"
 //---------------------------------------------------------------------------
@@ -10,25 +10,35 @@ namespace db
 namespace test
 {
 
-class TestType : public TestBase
+class TestValue : public TestBase
 {
 public:
-    TestType()
+    TestValue()
     {
     }
 
-    virtual ~TestType()
+    virtual ~TestValue()
     {
     }
 
     virtual bool DoTest();
 
 private:
-    bool TestNormal();
+    bool TestInvaild();
+    bool TestBoolean();
+    bool TestInt();
+    bool TestUInt();
+    bool TestFloat();
+    bool TestBinary();
+    bool TestString();
+    bool TestList();
+    bool TestSet();
+    bool TestZSet();
+    bool TestHash();
 };
 
 }// namespace test
 
 }//namespace db
 //---------------------------------------------------------------------------
-#endif// DB_TEST_TYPE_H_
+#endif// DB_TEST_VALUE_H_
