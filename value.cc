@@ -358,7 +358,10 @@ bool Value::SetHash(Hash&& val)
 }
 //---------------------------------------------------------------------------
 template<typename T>
-static bool CompContainer(const T& left, const T& right)
+bool CompContainer2(const T& left, const T& right);
+//---------------------------------------------------------------------------
+template<typename T>
+static bool CompContainer1(const T& left, const T& right)
 {
     if(left.size() != right.size())
         return false;
@@ -401,7 +404,8 @@ static bool CompContainer(const T& left, const T& right)
                 break;
 
             case Value::TYPE_BINARY:
-                return (0 == memcmp(l->GetBinary().data(), r->GetBinary().data(), l->GetBinary().size()));
+                if(0 != memcmp(l->GetBinary().data(), r->GetBinary().data(), l->GetBinary().size()))
+                    return false;
 
                 break;
 
@@ -412,25 +416,25 @@ static bool CompContainer(const T& left, const T& right)
                 break;
 
             case Value::TYPE_LIST:
-                if(true != CompContainer(l->GetList(), r->GetList()))
+                if(true != CompContainer1(l->GetList(), r->GetList()))
                     return false;
 
                 break;
 
             case Value::TYPE_SET:
-                if(true != CompContainer(l->GetSet(), r->GetSet()))
+                if(true != CompContainer1(l->GetSet(), r->GetSet()))
                     return false;
 
                 break;
 
             case Value::TYPE_ZSET:
-                //if(true != CompContainer(l->GetZSet(), r->GetZSet()))
+                if(true != CompContainer2(l->GetZSet(), r->GetZSet()))
                     return false;
 
                 break;
 
             case Value::TYPE_HASH:
-                //if(true != CompContainer(l->GetHash(), r->GetHash()))
+                if(true != CompContainer2(l->GetHash(), r->GetHash()))
                     return false;
 
                 break;
@@ -444,8 +448,8 @@ static bool CompContainer(const T& left, const T& right)
     return true;
 }
 //---------------------------------------------------------------------------
-template<>
-bool CompContainer(const Value::ZSet& left, const Value::ZSet& right)
+template<typename T>
+bool CompContainer2(const T& left, const T& right)
 {
     if(left.size() != right.size())
         return false;
@@ -461,66 +465,66 @@ bool CompContainer(const Value::ZSet& left, const Value::ZSet& right)
         switch(l->second.type())
         {
             case Value::TYPE_INVALID:
-                if(l->obj() != r->obj())
+                if(l->second.obj() != r->second.obj())
                     return false;
 
                 break;
 
             case Value::TYPE_BOOLEAN:
-                if(l->GetBoolean() != r->GetBoolean())
+                if(l->second.GetBoolean() != r->second.GetBoolean())
                     return false;
 
                 break;
 
             case Value::TYPE_INT:
-                if(l->GetInt() != r->GetInt())
+                if(l->second.GetInt() != r->second.GetInt())
                     return false;
 
                 break;
 
             case Value::TYPE_UINT:
-                if(l->GetUInt() != r->GetUInt())
+                if(l->second.GetUInt() != r->second.GetUInt())
                     return false;
 
                 break;
 
             case Value::TYPE_FLOAT:
-                if(l->GetFloat() != r->GetFloat())
+                if(l->second.GetFloat() != r->second.GetFloat())
                     return false;
 
                 break;
 
             case Value::TYPE_BINARY:
-                return (0 == memcmp(l->GetBinary().data(), r->GetBinary().data(), l->GetBinary().size()));
+                return (0 == memcmp(l->second.GetBinary().data(), r->second.GetBinary().data(), l->second.GetBinary().size()));
 
                 break;
 
             case Value::TYPE_STRING:
-                if(l->GetString() != r->GetString())
+                if(l->second.GetString() != r->second.GetString())
                     return false;
 
                 break;
 
             case Value::TYPE_LIST:
-                if(true != CompContainer(l->GetList(), r->GetList()))
+                if(true != CompContainer1(l->second.GetList(), r->second.GetList()))
                     return false;
 
                 break;
 
             case Value::TYPE_SET:
-                if(true != CompContainer(l->GetSet(), r->GetSet()))
+                if(true != CompContainer1(l->second.GetSet(), r->second.GetSet()))
                     return false;
 
                 break;
 
             case Value::TYPE_ZSET:
-                //if(true != CompContainer(l->GetZSet(), r->GetZSet()))
+                if(true != CompContainer2(l->second.GetZSet(), r->second.GetZSet()))
                     return false;
 
                 break;
 
             case Value::TYPE_HASH:
-                //if(true != CompContainer(l->GetHash(), r->GetHash()))
+                if(true != CompContainer2(l->second.GetHash(), r->second.GetHash()))
                     return false;
 
                 break;
@@ -563,16 +567,16 @@ bool operator==(const Value& left, const Value& right)
             return (left.GetString() == right.GetString());
 
         case Value::TYPE_LIST:
-            return CompContainer(left.GetList(), right.GetList());
+            return CompContainer1(left.GetList(), right.GetList());
 
         case Value::TYPE_SET:
-            return CompContainer(left.GetSet(), right.GetSet());
+            return CompContainer1(left.GetSet(), right.GetSet());
 
         case Value::TYPE_ZSET:
-            //return CompContainer(left.GetZSet(), right.GetZSet());
+            return CompContainer2(left.GetZSet(), right.GetZSet());
 
         case Value::TYPE_HASH:
-            //return CompContainer(left.GetHash(), right.GetHash());
+            return CompContainer2(left.GetHash(), right.GetHash());
 
         default:
             assert(0);
