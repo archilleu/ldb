@@ -442,6 +442,65 @@ bool TestValue::TestSet()
 //---------------------------------------------------------------------------
 bool TestValue::TestZSet()
 {
+    Value::ZSet zset1;
+    Value::ZSet zset2;
+//    zset1.emplace(1.0, Value(true));
+//    zset2.emplace(1.0, Value(false));
+//    zset1.emplace(1.0, Value(int64_t(1)));
+//    zset2.emplace(1.0, Value(int64_t(2)));
+//    zset1.emplace(1.0, Value(1.0));
+//    zset2.emplace(1.0, Value(2.0));
+    zset1.emplace(1.0, Value("string1"));
+//    zset2.emplace(1.0, Value("string2"));
+
+    Value o(zset1);
+    MY_ASSERT(Value(zset1) == o);
+    std::cout << o << std::endl;
+    MY_ASSERT(o.type() == Value::TYPE_SET);
+    MY_ASSERT(zset1 == o.GetZSet());
+    MY_ASSERT(o.SetZSet(zset2));
+    MY_ASSERT(zset2 == o.GetZSet());
+    MY_ASSERT(o.type() == Value::TYPE_SET);
+    MY_ASSERT(Value(zset1) != o);
+    MY_ASSERT(Value(zset2) == o);
+    std::cout << o << std::endl;
+
+    Value o1(zset1);
+    MY_ASSERT(o1.type() == Value::TYPE_SET);
+    MY_ASSERT(zset1 == o1.GetZSet());
+    MY_ASSERT(o1.SetZSet(Value::ZSet(zset2)));
+    MY_ASSERT(zset2 == o1.GetZSet());
+    MY_ASSERT(o1.type() == Value::TYPE_SET);
+
+    Value oc(o);
+    MY_ASSERT(oc == o);
+    MY_ASSERT(false == oc.obj().unique());
+    MY_ASSERT(oc.type() == Value::TYPE_SET);
+    MY_ASSERT(zset2  == oc.GetZSet());
+    MY_ASSERT(oc.SetZSet(zset1));
+    MY_ASSERT(zset1 == oc.GetZSet());
+    MY_ASSERT(oc.type() == Value::TYPE_SET);
+
+    Value om(std::move(o));
+    MY_ASSERT(oc != o);
+    MY_ASSERT(om.obj().unique());
+    MY_ASSERT(om.type() == Value::TYPE_SET);
+    MY_ASSERT(zset2 == om.GetZSet());
+    MY_ASSERT(om.SetZSet(zset1));
+    MY_ASSERT(zset1 == om.GetZSet());
+    MY_ASSERT(om.type() == Value::TYPE_SET);
+
+    auto& val = om.GetZSet();
+    val.emplace(1.0, Value(int64_t(LONG_LONG_MAX)));
+    val.emplace(1.0, Value(uint64_t(ULONG_LONG_MAX)));
+    val.emplace(1.0, Value(3.14));
+    val.emplace(1.0, Value("string"));
+    std::cout << om << std::endl;
+
+    MY_ASSERT(o.type() == Value::TYPE_INVALID);
+    std::shared_ptr<void> p;
+    MY_ASSERT(o.obj() == p);
+
     return true;
 }
 //---------------------------------------------------------------------------

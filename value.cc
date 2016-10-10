@@ -385,13 +385,66 @@ static std::string BinToString(const unsigned char* buffer, size_t len)
      return result;
 }
 //---------------------------------------------------------------------------
+static std::string ListToString(const Value::List& val);
+static std::string SetToString(const Value::Set& val);
+static std::string ZSetToString(const Value::ZSet& val);
+static std::string HashToString(const Value::Hash& val);
+//---------------------------------------------------------------------------
 static std::string ListToString(const Value::List& val)
 {
     std::stringstream ss;
     ss << "[";
 
     for(auto iter : val)
-        ss << iter << ", ";
+    {
+        switch(iter.type())
+        {
+            case Value::TYPE_INVALID:
+                ss << "nil";
+                break;
+
+            case Value::TYPE_BOOLEAN: 
+                ss << std::boolalpha << iter.GetBoolean() << std::noboolalpha;
+                break;
+
+            case Value::TYPE_INT: 
+                ss << iter.GetInt();
+                break;
+
+            case Value::TYPE_UINT: 
+                ss << iter.GetUInt();
+                break;
+
+            case Value::TYPE_FLOAT: 
+                ss << iter.GetFloat();
+                break;
+
+            case Value::TYPE_STRING: 
+                ss << "\"" << iter.GetString() << "\"";
+                break;
+
+            case Value::TYPE_BINARY:
+                ss << "x\'" << BinToString(iter.GetBinary().data(), iter.GetBinary().size());
+                break;
+
+            case Value::TYPE_LIST:
+                ss << ListToString(iter.GetList());
+                break;
+
+            case Value::TYPE_SET:
+                ss << SetToString(iter.GetSet());
+                break;
+
+            case Value::TYPE_ZSET:
+                ss << ZSetToString(ss.GetZSet());
+                break;
+
+            case Value::TYPE_HASH:
+                out << HashToString(val.GetHash());
+                break;
+        }
+            ss << iter << ", ";
+    }
 
     std::string str = ss.str();
     str.pop_back();str.pop_back();
@@ -421,7 +474,10 @@ static std::string ZSetToString(const Value::ZSet& val)
     ss << "(";
 
     for(auto iter : val)
-        ss << iter.first << ":" << iter.second << ", ";
+    {
+        ss << iter.first << ":";
+         ss << iter.second << ", ";
+    }
 
     std::string str = ss.str();
     str.pop_back();str.pop_back();
@@ -447,6 +503,7 @@ static std::string HashToString(const Value::Hash& val)
 //---------------------------------------------------------------------------
 std::stringstream& operator<<(std::stringstream& out, const Value& val)
 {
+    out << "\t";
     switch(val.type())
     {
         case Value::TYPE_INVALID:
@@ -494,6 +551,7 @@ std::stringstream& operator<<(std::stringstream& out, const Value& val)
             break;
     }
 
+    out << std::endl;
     return out;
 }
 //---------------------------------------------------------------------------
@@ -502,9 +560,9 @@ std::ostream& operator<<(std::ostream& out, const Value& val)
     std::stringstream ss;
     ss << val;
 
-    std::cout << "{ ";
+    std::cout << "{" << std::endl;
         std::cout << ss.str();
-    std::cout << " }";
+    std::cout << "}" << std::endl;
 
     return out;
 }

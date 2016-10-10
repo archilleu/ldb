@@ -46,7 +46,7 @@ public:
     using String    = std::string;
     using List      = std::list<Value>;
     using Set       = std::unordered_set<Value, HashFunc>;
-    using ZSet      = std::unordered_map<double, Value>;
+    using ZSet      = std::unordered_multimap<double, Value>;
     using Hash      = std::map<String, Value>;
 
     //Constructor
@@ -152,6 +152,7 @@ using ValuePtr = std::shared_ptr<Value>;
 //operator overload
 std::stringstream& operator<<(std::stringstream& out, const Value& val);
 std::ostream& operator<<(std::ostream& out, const Value& val);
+
 }//namespace db
 //---------------------------------------------------------------------------
 #endif //DB_VALUE_H_
