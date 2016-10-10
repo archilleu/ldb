@@ -11,6 +11,7 @@
 #include <memory>
 #include <assert.h>
 #include <functional>
+#include <iostream>
 //-----------------------------------------------------------------------------
 namespace db
 {
@@ -37,20 +38,14 @@ public:
     //hash function(for unordered_set)
     struct HashFunc
     {
-        std::size_t operator()(const Value& obj) const;
-    };
-
-    //equal function(for unordered_set)
-    struct EqualFunc
-    {
-        bool operator()(const Value& left, const Value& right);
+        size_t operator()(const Value& obj) const;
     };
 
     //data type alias
     using Binary    = std::vector<unsigned char>;
     using String    = std::string;
     using List      = std::list<Value>;
-    using Set       = std::unordered_set<Value, HashFunc, EqualFunc>;
+    using Set       = std::unordered_set<Value, HashFunc>;
     using ZSet      = std::unordered_map<double, Value>;
     using Hash      = std::map<String, Value>;
 
@@ -61,24 +56,24 @@ public:
     explicit Value(uint64_t val):type_(TYPE_UINT), obj_(std::make_shared<uint64_t>(val)){}
     explicit Value(double val):type_(TYPE_FLOAT), obj_(std::make_shared<double>(val)){}
 
-    Value(const Binary& val):type_(TYPE_BINARY), obj_(std::make_shared<Binary>(val)){}
-    Value(Binary&& val):type_(TYPE_BINARY), obj_(std::make_shared<Binary>(std::move(val))){}
+    explicit Value(const Binary& val):type_(TYPE_BINARY), obj_(std::make_shared<Binary>(val)){}
+    explicit Value(Binary&& val):type_(TYPE_BINARY), obj_(std::make_shared<Binary>(std::move(val))){}
 
-    Value(const char* val):type_(TYPE_STRING), obj_(std::make_shared<String>(val)){}
-    Value(const String& val):type_(TYPE_STRING), obj_(std::make_shared<String>(val)){}
-    Value(String&& val):type_(TYPE_STRING), obj_(std::make_shared<String>(std::move(val))){}
+    explicit Value(const char* val):type_(TYPE_STRING), obj_(std::make_shared<String>(val)){}
+    explicit Value(const String& val):type_(TYPE_STRING), obj_(std::make_shared<String>(val)){}
+    explicit Value(String&& val):type_(TYPE_STRING), obj_(std::make_shared<String>(std::move(val))){}
 
-    Value(const List& val):type_(TYPE_LIST), obj_(std::make_shared<List>(val)){}
-    Value(List&& val):type_(TYPE_LIST), obj_(std::make_shared<List>(std::move(val))){}
+    explicit Value(const List& val):type_(TYPE_LIST), obj_(std::make_shared<List>(val)){}
+    explicit Value(List&& val):type_(TYPE_LIST), obj_(std::make_shared<List>(std::move(val))){}
 
-    Value(const Set& val):type_(TYPE_SET), obj_(std::make_shared<Set>(val)){}
-    Value(Set&& val):type_(TYPE_SET), obj_(std::make_shared<Set>(std::move(val))){}
+    explicit Value(const Set& val):type_(TYPE_SET), obj_(std::make_shared<Set>(val)){}
+    explicit Value(Set&& val):type_(TYPE_SET), obj_(std::make_shared<Set>(std::move(val))){}
 
-    Value(const ZSet& val):type_(TYPE_ZSET), obj_(std::make_shared<ZSet>(val)){}
-    Value(ZSet&& val):type_(TYPE_ZSET), obj_(std::make_shared<ZSet>(std::move(val))){}
+    explicit Value(const ZSet& val):type_(TYPE_ZSET), obj_(std::make_shared<ZSet>(val)){}
+    explicit Value(ZSet&& val):type_(TYPE_ZSET), obj_(std::make_shared<ZSet>(std::move(val))){}
 
-    Value(const Hash& val):type_(TYPE_HASH), obj_(std::make_shared<Hash>(val)){}
-    Value(Hash&& val):type_(TYPE_HASH), obj_(std::make_shared<Hash>(std::move(val))){}
+    explicit Value(const Hash& val):type_(TYPE_HASH), obj_(std::make_shared<Hash>(val)){}
+    explicit Value(Hash&& val):type_(TYPE_HASH), obj_(std::make_shared<Hash>(std::move(val))){}
 
     Value(const Value& o) { *this = o; }    //lazy copy
     Value(Value&& o) { *this = std::move(o); }
@@ -142,15 +137,21 @@ public:
     std::shared_ptr<void>& obj() { return obj_; }
 
     //operator overload
-    friend bool operator==(const Value& left, const Value& right);
-    friend bool operator!=(const Value& left, const Value& right);
+    bool operator==(const Value& val) const;
+    bool operator!=(const Value& val) const;
+
+    friend std::stringstream& operator<<(std::stringstream& out, const Value& val);
+    friend std::ostream& operator<<(std::ostream& out, const Value& val);
 
 private:
     short type_;
     std::shared_ptr<void> obj_;
 };
 using ValuePtr = std::shared_ptr<Value>;
-
+//---------------------------------------------------------------------------
+//operator overload
+std::stringstream& operator<<(std::stringstream& out, const Value& val);
+std::ostream& operator<<(std::ostream& out, const Value& val);
 }//namespace db
 //---------------------------------------------------------------------------
 #endif //DB_VALUE_H_

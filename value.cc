@@ -1,5 +1,6 @@
 //---------------------------------------------------------------------------
 #include <string.h>
+#include <sstream>
 #include "value.h"
 //---------------------------------------------------------------------------
 namespace db
@@ -9,96 +10,74 @@ size_t Value::HashFunc::operator()(const Value& obj) const
 {
     switch(obj.type())
     {
+        case TYPE_INVALID:
+            return 0;
+
         case TYPE_BOOLEAN:
-            {
-                std::hash<std::shared_ptr<bool> > hash_fn;
-                return hash_fn(std::static_pointer_cast<bool>(obj.obj()));
-            }
+        {
+            std::hash<bool> hash_fn;
+            return hash_fn(*std::static_pointer_cast<bool>(obj.obj()));
+        }
 
         case TYPE_INT:
-            {
-                std::hash<std::shared_ptr<int64_t> > hash_fn;
-                return hash_fn(std::static_pointer_cast<int64_t>(obj.obj()));
-            }
+        {
+            std::hash<int64_t> hash_fn;
+            return hash_fn(*std::static_pointer_cast<int64_t>(obj.obj()));
+        }
 
         case TYPE_UINT:
-            {
-                std::hash<std::shared_ptr<uint64_t> > hash_fn;
-                return hash_fn(std::static_pointer_cast<uint64_t>(obj.obj()));
-            }
+        {
+            std::hash<uint64_t> hash_fn;
+            return hash_fn(*std::static_pointer_cast<uint64_t>(obj.obj()));
+        }
 
         case TYPE_FLOAT:
-            {
-                std::hash<std::shared_ptr<double> > hash_fn;
-                return hash_fn(std::static_pointer_cast<double>(obj.obj()));
-            }
+        {
+            std::hash<double> hash_fn;
+            return hash_fn(*std::static_pointer_cast<double>(obj.obj()));
+        }
 
         case TYPE_BINARY:
-            {
-                std::hash<std::shared_ptr<Binary> > hash_fn;
-                return hash_fn(std::static_pointer_cast<Binary>(obj.obj()));
-            }
+        {
+            std::hash<std::shared_ptr<Binary> > hash_fn;
+            return hash_fn(std::static_pointer_cast<Binary>(obj.obj()));
+        }
 
         case TYPE_STRING:
-            {
-                std::hash<std::shared_ptr<String> > hash_fn;
-                return hash_fn(std::static_pointer_cast<String>(obj.obj()));
-            }
+        {
+            std::hash<String> hash_fn;
+            return hash_fn(*std::static_pointer_cast<String>(obj.obj()));
+        }
 
         case TYPE_LIST:
-            {
-                std::hash<std::shared_ptr<List> > hash_fn;
-                return hash_fn(std::static_pointer_cast<List>(obj.obj()));
-            }
+        {
+            std::hash<std::shared_ptr<List> > hash_fn;
+            return hash_fn(std::static_pointer_cast<List>(obj.obj()));
+        }
 
         case TYPE_SET:
-            {
-                std::hash<std::shared_ptr<Set> > hash_fn;
-                return hash_fn(std::static_pointer_cast<Set>(obj.obj()));
-            }
+        {
+            std::hash<std::shared_ptr<Set> > hash_fn;
+            return hash_fn(std::static_pointer_cast<Set>(obj.obj()));
+        }
 
         case TYPE_ZSET:
-            {
-                std::hash<std::shared_ptr<ZSet> > hash_fn;
-                return hash_fn(std::static_pointer_cast<ZSet>(obj.obj()));
-            }
+        {
+            std::hash<std::shared_ptr<ZSet> > hash_fn;
+            return hash_fn(std::static_pointer_cast<ZSet>(obj.obj()));
+        }
 
         case TYPE_HASH:
-            {
-                std::hash<std::shared_ptr<Hash> > hash_fn;
-                return hash_fn(std::static_pointer_cast<Hash>(obj.obj()));
-            }
+        {
+            std::hash<std::shared_ptr<Hash> > hash_fn;
+            return hash_fn(std::static_pointer_cast<Hash>(obj.obj()));
+        }
 
         default:
             assert(0);
-            return 0;
-    }
-}
-//---------------------------------------------------------------------------
-bool Value::EqualFunc::operator()(const Value& left, const Value& right)
-{
-    if(left.type() == right.type())
-    {
-        switch(left.type())
-        {
-            case TYPE_BOOLEAN: return std::static_pointer_cast<bool>(left.obj()) == std::static_pointer_cast<bool>(right.obj());
-            case TYPE_INT: return std::static_pointer_cast<int64_t>(left.obj()) == std::static_pointer_cast<int64_t>(right.obj());
-            case TYPE_UINT: return std::static_pointer_cast<uint64_t>(left.obj()) == std::static_pointer_cast<uint64_t>(right.obj());
-            case TYPE_FLOAT: return std::static_pointer_cast<double>(left.obj()) == std::static_pointer_cast<double>(right.obj());
-            case TYPE_BINARY: return std::static_pointer_cast<Binary>(left.obj()) == std::static_pointer_cast<Binary>(right.obj());
-            case TYPE_STRING: return std::static_pointer_cast<String>(left.obj()) == std::static_pointer_cast<String>(right.obj());
-            case TYPE_LIST: return std::static_pointer_cast<List>(left.obj()) == std::static_pointer_cast<List>(right.obj());
-            case TYPE_SET: return std::static_pointer_cast<Set>(left.obj()) == std::static_pointer_cast<Set>(right.obj());
-            case TYPE_ZSET: return std::static_pointer_cast<ZSet>(left.obj()) == std::static_pointer_cast<ZSet>(right.obj());
-            case TYPE_HASH: return std::static_pointer_cast<Hash>(left.obj()) == std::static_pointer_cast<Hash>(right.obj());
-
-            default:
-                assert(0);
-                return true;
-        }
     }
 
-    return false;
+    return 0;
 }
 //---------------------------------------------------------------------------
 bool Value::SetBoolean(bool val)
@@ -357,240 +336,177 @@ bool Value::SetHash(Hash&& val)
     return true;
 }
 //---------------------------------------------------------------------------
-template<typename T>
-static bool CompContainer1(const T& left, const T& right);
-template<typename T>
-static bool CompContainer2(const T& left, const T& right);
-//---------------------------------------------------------------------------
-template<typename T>
-static bool CompContainer1(const T& left, const T& right)
+bool Value::operator==(const Value& val) const
 {
-    if(left.size() != right.size())
+    if(type() != val.type())
         return false;
 
-    for(auto l=left.begin(),r=right.begin(); l!=left.end(); ++l,++r)
+    switch(val.type())
     {
-        if(l->type() != r->type())
-            return false;
-
-        switch(l->type())
-        {
-            case Value::TYPE_INVALID:
-                if(l->obj() != r->obj())
-                    return false;
-
-                break;
-
-            case Value::TYPE_BOOLEAN:
-                if(l->GetBoolean() != r->GetBoolean())
-                    return false;
-
-                break;
-
-            case Value::TYPE_INT:
-                if(l->GetInt() != r->GetInt())
-                    return false;
-
-                break;
-
-            case Value::TYPE_UINT:
-                if(l->GetUInt() != r->GetUInt())
-                    return false;
-
-                break;
-
-            case Value::TYPE_FLOAT:
-                if(0 != static_cast<int>(l->GetFloat()-r->GetFloat()))
-                    return false;
-
-                break;
-
-            case Value::TYPE_BINARY:
-                if(0 != memcmp(l->GetBinary().data(), r->GetBinary().data(), l->GetBinary().size()))
-                    return false;
-
-                break;
-
-            case Value::TYPE_STRING:
-                if(l->GetString() != r->GetString())
-                    return false;
-
-                break;
-
-            case Value::TYPE_LIST:
-                if(true != CompContainer1(l->GetList(), r->GetList()))
-                    return false;
-
-                break;
-
-            case Value::TYPE_SET:
-                if(true != CompContainer1(l->GetSet(), r->GetSet()))
-                    return false;
-
-                break;
-
-            case Value::TYPE_ZSET:
-                if(true != CompContainer2(l->GetZSet(), r->GetZSet()))
-                    return false;
-
-                break;
-
-            case Value::TYPE_HASH:
-                if(true != CompContainer2(l->GetHash(), r->GetHash()))
-                    return false;
-
-                break;
-
-            default:
-                assert(0);
-                return false;
-        }
-    }
-
-    return true;
-}
-//---------------------------------------------------------------------------
-template<typename T>
-static bool CompContainer2(const T& left, const T& right)
-{
-    if(left.size() != right.size())
-        return false;
-
-    for(auto l=left.begin(),r=right.begin(); l!=left.end(); ++l,++r)
-    {
-        if(l->first != r->first)
-            return false;
-
-        if(l->second.type() != r->second.type())
-            return false;
-
-        switch(l->second.type())
-        {
-            case Value::TYPE_INVALID:
-                if(l->second.obj() != r->second.obj())
-                    return false;
-
-                break;
-
-            case Value::TYPE_BOOLEAN:
-                if(l->second.GetBoolean() != r->second.GetBoolean())
-                    return false;
-
-                break;
-
-            case Value::TYPE_INT:
-                if(l->second.GetInt() != r->second.GetInt())
-                    return false;
-
-                break;
-
-            case Value::TYPE_UINT:
-                if(l->second.GetUInt() != r->second.GetUInt())
-                    return false;
-
-                break;
-
-            case Value::TYPE_FLOAT:
-                if(0 != static_cast<int>(l->second.GetFloat()-r->second.GetFloat()))
-                    return false;
-
-                break;
-
-            case Value::TYPE_BINARY:
-                return (0 == memcmp(l->second.GetBinary().data(), r->second.GetBinary().data(), l->second.GetBinary().size()));
-
-                break;
-
-            case Value::TYPE_STRING:
-                if(l->second.GetString() != r->second.GetString())
-                    return false;
-
-                break;
-
-            case Value::TYPE_LIST:
-                if(true != CompContainer1(l->second.GetList(), r->second.GetList()))
-                    return false;
-
-                break;
-
-            case Value::TYPE_SET:
-                if(true != CompContainer1(l->second.GetSet(), r->second.GetSet()))
-                    return false;
-
-                break;
-
-            case Value::TYPE_ZSET:
-                if(true != CompContainer2(l->second.GetZSet(), r->second.GetZSet()))
-                    return false;
-
-                break;
-
-            case Value::TYPE_HASH:
-                if(true != CompContainer2(l->second.GetHash(), r->second.GetHash()))
-                    return false;
-
-                break;
-
-            default:
-                assert(0);
-                return false;
-        }
-    }
-
-    return true;
-}
-//---------------------------------------------------------------------------
-bool operator==(const Value& left, const Value& right)
-{
-    if(left.type() != right.type())
-        return false;
-
-    switch(left.type())
-    {
-        case Value::TYPE_INVALID:
-            return (left.obj() == right.obj());
-
-        case Value::TYPE_BOOLEAN:
-            return (left.GetBoolean() == right.GetBoolean());
-
-        case Value::TYPE_INT:
-            return (left.GetInt() == right.GetInt());
-
-        case Value::TYPE_UINT:
-            return (left.GetUInt() == right.GetUInt());
-
-        case Value::TYPE_FLOAT:
-            return (0 != static_cast<int>(left.GetFloat() - right.GetFloat()));
-
-        case Value::TYPE_BINARY:
-            return (0 == memcmp(left.GetBinary().data(), right.GetBinary().data(), left.GetBinary().size()));
-
-        case Value::TYPE_STRING:
-            return (left.GetString() == right.GetString());
-
-        case Value::TYPE_LIST:
-            return CompContainer1(left.GetList(), right.GetList());
-
-        case Value::TYPE_SET:
-            return CompContainer1(left.GetSet(), right.GetSet());
-
-        case Value::TYPE_ZSET:
-            return CompContainer2(left.GetZSet(), right.GetZSet());
-
-        case Value::TYPE_HASH:
-            return CompContainer2(left.GetHash(), right.GetHash());
+        case TYPE_INVALID:  return obj_ == val.obj();
+        case TYPE_BOOLEAN:  return *std::static_pointer_cast<bool>(obj_) == *std::static_pointer_cast<bool>(val.obj());
+        case TYPE_INT:      return *std::static_pointer_cast<int64_t>(obj_) == *std::static_pointer_cast<int64_t>(val.obj());
+        case TYPE_UINT:     return *std::static_pointer_cast<uint64_t>(obj_) == *std::static_pointer_cast<uint64_t>(val.obj());
+        case TYPE_FLOAT:    return *std::static_pointer_cast<double>(obj_) == *std::static_pointer_cast<double>(val.obj());
+        case TYPE_BINARY:   return *std::static_pointer_cast<Binary>(obj_) == *std::static_pointer_cast<Binary>(val.obj());
+        case TYPE_STRING:   return *std::static_pointer_cast<String>(obj_) == *std::static_pointer_cast<String>(val.obj());
+        case TYPE_LIST:     return *std::static_pointer_cast<List>(obj_) == *std::static_pointer_cast<List>(val.obj());
+        case TYPE_SET:      return *std::static_pointer_cast<Set>(obj_) == *std::static_pointer_cast<Set>(val.obj());
+        case TYPE_ZSET:     return *std::static_pointer_cast<ZSet>(obj_) == *std::static_pointer_cast<ZSet>(val.obj());
+        case TYPE_HASH:     return *std::static_pointer_cast<Hash>(obj_) == *std::static_pointer_cast<Hash>(val.obj());
 
         default:
             assert(0);
-            return false;
-        }
+    }
 
     return true;
+}
+//---------------------------------------------------------------------------
+bool Value::operator!=(const Value& val) const
+{
+    return !(*this == val);
 }
 //---------------------------------------------------------------------------
 bool operator!=(const Value& left, const Value& right)
 {
     return !(left==right);
+}
+//---------------------------------------------------------------------------
+static std::string BinToString(const unsigned char* buffer, size_t len)
+{
+     char bin[3];
+     std::string result;
+     for(size_t i=0; i<len; i++)
+     {
+         snprintf(bin, 3, "%02X", buffer[i]);
+         result.append(bin);
+     }
+
+     return result;
+}
+//---------------------------------------------------------------------------
+static std::string ListToString(const Value::List& val)
+{
+    std::stringstream ss;
+    ss << "[";
+
+    for(auto iter : val)
+        ss << iter << ", ";
+
+    std::string str = ss.str();
+    str.pop_back();str.pop_back();
+    str += "]";
+
+    return str;
+}
+//---------------------------------------------------------------------------
+static std::string SetToString(const Value::Set& val)
+{
+    std::stringstream ss;
+    ss << "(";
+
+    for(auto iter : val)
+        ss << iter << ", ";
+
+    std::string str = ss.str();
+    str.pop_back();str.pop_back();
+    str += ")";
+
+    return str;
+}
+//---------------------------------------------------------------------------
+static std::string ZSetToString(const Value::ZSet& val)
+{
+    std::stringstream ss;
+    ss << "(";
+
+    for(auto iter : val)
+        ss << iter.first << ":" << iter.second << ", ";
+
+    std::string str = ss.str();
+    str.pop_back();str.pop_back();
+    str += ")";
+
+    return str;
+}
+//---------------------------------------------------------------------------
+static std::string HashToString(const Value::Hash& val)
+{
+    std::stringstream ss;
+    ss << "{";
+
+    for(auto iter : val)
+        ss << "\"" << iter.first << "\"" << ":" << iter.second << ", ";
+
+    std::string str = ss.str();
+    str.pop_back();str.pop_back();
+    str += "}";
+
+    return str;
+}
+//---------------------------------------------------------------------------
+std::stringstream& operator<<(std::stringstream& out, const Value& val)
+{
+    switch(val.type())
+    {
+        case Value::TYPE_INVALID:
+            out << "nil";
+            break;
+
+        case Value::TYPE_BOOLEAN: 
+            out << std::boolalpha << val.GetBoolean() << std::noboolalpha;
+            break;
+
+        case Value::TYPE_INT: 
+            out << val.GetInt();
+            break;
+
+        case Value::TYPE_UINT: 
+            out << val.GetUInt();
+            break;
+
+        case Value::TYPE_FLOAT: 
+            out << val.GetFloat();
+            break;
+
+        case Value::TYPE_STRING: 
+            out << "\"" << val.GetString() << "\"";
+            break;
+
+        case Value::TYPE_BINARY:
+            out << "x\'" << BinToString(val.GetBinary().data(), val.GetBinary().size());
+            break;
+
+        case Value::TYPE_LIST:
+            out << ListToString(val.GetList());
+            break;
+
+        case Value::TYPE_SET:
+            out << SetToString(val.GetSet());
+            break;
+
+        case Value::TYPE_ZSET:
+            out << ZSetToString(val.GetZSet());
+            break;
+
+        case Value::TYPE_HASH:
+            out << HashToString(val.GetHash());
+            break;
+    }
+
+    return out;
+}
+//---------------------------------------------------------------------------
+std::ostream& operator<<(std::ostream& out, const Value& val)
+{
+    std::stringstream ss;
+    ss << val;
+
+    std::cout << "{ ";
+        std::cout << ss.str();
+    std::cout << " }";
+
+    return out;
 }
 //---------------------------------------------------------------------------
 }//namespace db

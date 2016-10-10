@@ -6,6 +6,7 @@
 #include <float.h>
 #include <memory>
 #include <cmath>
+#include <sstream>
 //---------------------------------------------------------------------------
 namespace db 
 {
@@ -13,121 +14,6 @@ namespace db
 namespace test
 {
 
-//---------------------------------------------------------------------------
-template<typename T>
-static void PrintContainer1(const T& val);
-template<typename T>
-static void PrintContainer2(const T& val);
-//---------------------------------------------------------------------------
-template<typename T>
-static void PrintContainer1(const T& val)
-{
-    std::cout << "[ ";
-    for(auto iter : val)
-    {
-        switch(iter.type())
-        {
-            case Value::TYPE_INVALID:
-                std::cout << "nil" << ", ";
-                break;
-
-            case Value::TYPE_BOOLEAN: 
-                std::cout << iter.GetBoolean() << ", ";
-                break;
-
-            case Value::TYPE_INT: 
-                std::cout << iter.GetInt() << ", ";
-                break;
-
-            case Value::TYPE_UINT: 
-                std::cout << iter.GetUInt() << ", ";
-                break;
-
-            case Value::TYPE_FLOAT: 
-                std::cout << iter.GetFloat() << ", ";
-                break;
-
-            case Value::TYPE_STRING: 
-                std::cout << iter.GetString() << ", ";
-                break;
-
-            case Value::TYPE_BINARY:
-             //   PrintContainer(iter.GetBinary());
-                break;
-
-            case Value::TYPE_LIST:
-                PrintContainer1(iter.GetList());
-                break;
-
-            case Value::TYPE_SET:
-                PrintContainer1(iter.GetSet());
-                break;
-
-            case Value::TYPE_ZSET:
-            //    PrintContainer(iter.GetZSet());
-                break;
-
-            case Value::TYPE_HASH:
-                //PrintContainer(iter.GetHash());
-                break;
-
-            default:
-                assert(0);
-        }
-    }
-
-    std::cout << " ]" << std::endl;
-}
-//---------------------------------------------------------------------------
-static void PrintValue(const Value& val)
-{
-    switch(val.type())
-    {
-        case Value::TYPE_INVALID:
-            std::cout << "nil" << std::endl;
-            break;
-
-        case Value::TYPE_BOOLEAN: 
-            std::cout << val.GetBoolean() << std::endl;;
-            break;
-
-        case Value::TYPE_INT: 
-            std::cout << val.GetInt() << std::endl;
-            break;
-
-        case Value::TYPE_UINT: 
-            std::cout << val.GetUInt() << std::endl;
-            break;
-
-        case Value::TYPE_FLOAT: 
-            std::cout << val.GetFloat() << std::endl;
-            break;
-
-        case Value::TYPE_STRING: 
-            std::cout << val.GetString() << std::endl;
-            break;
-
-        case Value::TYPE_BINARY:
-            //PrintContainer(val.GetBinary());
-            break;
-
-        case Value::TYPE_LIST:
-            PrintContainer1(val.GetList());
-            break;
-
-        case Value::TYPE_SET:
-            PrintContainer1(val.GetSet());
-            break;
-
-        case Value::TYPE_ZSET:
-            //PrintContainer(val.GetZSet());
-            break;
-
-        case Value::TYPE_HASH:
-            //PrintContainer(val.GetHash());
-            break;
-    }
-}
 //---------------------------------------------------------------------------
 bool TestValue::DoTest()
 {
@@ -152,6 +38,7 @@ bool TestValue::TestInvaild()
     {
     Value o;
     MY_ASSERT(o.type() == Value::TYPE_INVALID);
+    std::cout << o << std::endl;
 
     std::shared_ptr<void> p;
     MY_ASSERT(o.obj() == p);
@@ -178,6 +65,8 @@ bool TestValue::TestBoolean()
     //boolean
     {
     Value o(true);
+    std::cout << o << std::endl;
+    MY_ASSERT(Value(false) != o);
     MY_ASSERT(o.type() == Value::TYPE_BOOLEAN);
     MY_ASSERT(true == o.GetBoolean());
 
@@ -213,6 +102,7 @@ bool TestValue::TestInt()
     {
     int64_t v = LONG_LONG_MAX;
     Value o(v);
+    std::cout << o << std::endl;
     MY_ASSERT(o.type() == Value::TYPE_INT);
     MY_ASSERT(LONG_LONG_MAX == o.GetInt());
     MY_ASSERT(Value(int64_t(1)) != o);
@@ -248,6 +138,7 @@ bool TestValue::TestUInt()
     {
     uint64_t v = ULONG_LONG_MAX;
     Value o(v);
+    std::cout << o << std::endl;
     MY_ASSERT(o.type() == Value::TYPE_UINT);
     MY_ASSERT(ULONG_LONG_MAX == o.GetUInt());
     MY_ASSERT(Value(int64_t(1)) != o);
@@ -285,6 +176,7 @@ bool TestValue::TestFloat()
     {
     double v = DBL_MAX;
     Value o(v);
+    std::cout << o << std::endl;
     MY_ASSERT(o.type() == Value::TYPE_FLOAT);
     double diff = o.GetFloat() - v;
     diff = abs(static_cast<int>(diff));
@@ -325,11 +217,12 @@ bool TestValue::TestBinary()
 {
     //Binary
     {
-    const int size = 128;
+    const int size = 8;
     Value::Binary bin1(size, 'a');
     Value::Binary bin2(size, 'b');
 
     Value o(bin1);
+    std::cout << o << std::endl;
     MY_ASSERT(o.type() == Value::TYPE_BINARY);
     MY_ASSERT(bin1 == o.GetBinary());
     MY_ASSERT(bin1.empty() == false);
@@ -351,7 +244,9 @@ bool TestValue::TestBinary()
     MY_ASSERT(false == oc.obj().unique());
     MY_ASSERT(oc.type() == Value::TYPE_BINARY);
     MY_ASSERT(bin2 == oc.GetBinary());
+    MY_ASSERT(oc != (Value(bin1)));
     oc.SetBinary(bin1);
+    MY_ASSERT(oc == (Value(bin1)));
     MY_ASSERT(bin1 == oc.GetBinary());
     MY_ASSERT(oc.type() == Value::TYPE_BINARY);
 
@@ -379,6 +274,7 @@ bool TestValue::TestString()
     Value::String str2(size, 'b');
 
     Value o(str1);
+    std::cout << o << std::endl;
     MY_ASSERT(o.type() == Value::TYPE_STRING);
     MY_ASSERT(str1 == o.GetString());
     MY_ASSERT(o.SetString(str2));
@@ -395,6 +291,7 @@ bool TestValue::TestString()
 
     Value oc(o);
     MY_ASSERT(oc == o);
+    MY_ASSERT(oc != Value("abc"));
     MY_ASSERT(false == oc.obj().unique());
     MY_ASSERT(oc.type() == Value::TYPE_STRING);
     MY_ASSERT(str2 == oc.GetString());
@@ -462,7 +359,7 @@ bool TestValue::TestList()
     val.push_back(Value(uint64_t(ULONG_LONG_MAX)));
     val.push_back(Value(3.14));
     val.push_back(Value("string"));
-    PrintValue(om);
+    std::cout << om << std::endl;
 
     MY_ASSERT(o.type() == Value::TYPE_INVALID);
     std::shared_ptr<void> p;
@@ -471,8 +368,75 @@ bool TestValue::TestList()
     return true;
 }
 //---------------------------------------------------------------------------
+void PrintSet(const Value::Set& val)
+{
+    for(auto iter : val)
+        std::cout << iter << ", ";
+
+    std::cout << std::endl;
+}
+//---------------------------------------------------------------------------
 bool TestValue::TestSet()
 {
+    Value::Set set1;
+    Value::Set set2;
+    set1.insert(Value(true));
+    set2.insert(Value(false));
+    set1.insert(Value(int64_t(1)));
+    set2.insert(Value(int64_t(2)));
+    set1.insert(Value(1.0));
+    set2.insert(Value(2.0));
+    set1.insert(Value("string1"));
+    set2.insert(Value("string2"));
+
+    Value o(set1);
+    MY_ASSERT(Value(set1) == o);
+    std::cout << o << std::endl;
+    MY_ASSERT(o.type() == Value::TYPE_SET);
+    MY_ASSERT(set1 == o.GetSet());
+    MY_ASSERT(o.SetSet(set2));
+    MY_ASSERT(set2 == o.GetSet());
+    MY_ASSERT(o.type() == Value::TYPE_SET);
+    MY_ASSERT(Value(set1) != o);
+    MY_ASSERT(Value(set2) == o);
+    std::cout << o << std::endl;
+
+    Value o1(set1);
+    MY_ASSERT(o1.type() == Value::TYPE_SET);
+    MY_ASSERT(set1 == o1.GetSet());
+    MY_ASSERT(o1.SetSet(Value::Set(set2)));
+    MY_ASSERT(set2 == o1.GetSet());
+    MY_ASSERT(o1.type() == Value::TYPE_SET);
+
+    Value oc(o);
+    MY_ASSERT(oc == o);
+    MY_ASSERT(false == oc.obj().unique());
+    MY_ASSERT(oc.type() == Value::TYPE_SET);
+    MY_ASSERT(set2  == oc.GetSet());
+    MY_ASSERT(oc.SetSet(set1));
+    MY_ASSERT(set1 == oc.GetSet());
+    MY_ASSERT(oc.type() == Value::TYPE_SET);
+
+    Value om(std::move(o));
+    MY_ASSERT(oc != o);
+    MY_ASSERT(om.obj().unique());
+    MY_ASSERT(om.type() == Value::TYPE_SET);
+    MY_ASSERT(set2 == om.GetSet());
+    MY_ASSERT(om.SetSet(set1));
+    MY_ASSERT(set1 == om.GetSet());
+    MY_ASSERT(om.type() == Value::TYPE_SET);
+
+    auto& val = om.GetSet();
+    val.insert(Value(int64_t(LONG_LONG_MAX)));
+    val.insert(Value(uint64_t(ULONG_LONG_MAX)));
+    val.insert(Value(3.14));
+    val.insert(Value("string"));
+    std::cout << om << std::endl;
+
+    MY_ASSERT(o.type() == Value::TYPE_INVALID);
+    std::shared_ptr<void> p;
+    MY_ASSERT(o.obj() == p);
+
     return true;
 }
 //---------------------------------------------------------------------------
