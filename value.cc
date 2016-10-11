@@ -3,8 +3,27 @@
 #include <sstream>
 #include "value.h"
 //---------------------------------------------------------------------------
+namespace
+{
+
+std::string BinToString(const unsigned char* buffer, size_t len)
+{
+     char bin[3];
+     std::string result;
+     for(size_t i=0; i<len; i++)
+     {
+         snprintf(bin, 3, "%02X", buffer[i]);
+         result.append(bin);
+     }
+
+     return result;
+}
+
+}
+//---------------------------------------------------------------------------
 namespace db
 {
+
 //---------------------------------------------------------------------------
 size_t Value::HashFunc::operator()(const Value& obj) const
 {
@@ -390,22 +409,55 @@ bool Value::operator!=(const Value& val) const
     return !(*this == val);
 }
 //---------------------------------------------------------------------------
-bool operator!=(const Value& left, const Value& right)
+Value& Value::operator[](const char* key)
 {
-    return !(left==right);
+    assert(HASH == type_);
+
+    return GetHash()[key];
 }
 //---------------------------------------------------------------------------
-static std::string BinToString(const unsigned char* buffer, size_t len)
+Value& Value::operator[](const String& key)
 {
-     char bin[3];
-     std::string result;
-     for(size_t i=0; i<len; i++)
-     {
-         snprintf(bin, 3, "%02X", buffer[i]);
-         result.append(bin);
-     }
+    assert(HASH == type_);
 
-     return result;
+    return GetHash()[key];
+}
+//---------------------------------------------------------------------------
+const Value& Value::operator[](const char* key) const
+{
+    assert(HASH == type_);
+
+    static Value kNone(INVALID);
+
+    const auto& ret = GetHash().find(key);
+    if(ret == GetHash().end())
+        return kNone;
+
+    return ret->second;
+}
+//---------------------------------------------------------------------------
+const Value& Value::operator[](const String& key) const
+{
+    assert(HASH == type_);
+
+    static Value kNone(INVALID);
+
+    const auto& ret = GetHash().find(key);
+    if(ret == GetHash().end())
+        return kNone;
+
+    return ret->second;
+}
+//---------------------------------------------------------------------------
+Value::List Value::operator[](double score) const
+{
+    Value::List list;
+
+    //std::pair<Value::ZSet::const_iterator, Value::ZSet::const_iterator> pair = GetZSet().equal_range(score);
+    for(auto pair=GetZSet().equal_range(score); pair.first!=pair.second; ++pair.first)
+        list.push_back(pair.first->second);
+
+    return list;
 }
 //---------------------------------------------------------------------------
 std::string Value::ValueToString(int deep, bool add_tabs) const
@@ -414,10 +466,10 @@ std::string Value::ValueToString(int deep, bool add_tabs) const
 
     switch(type())
     {
-        case LIST:  if(true==add_tabs) ss << Tab(deep); ss << "[" << std::endl; break;
+        case LIST:  if(true==add_tabs) ss << AddTab(deep); ss << "[" << std::endl; break;
         case SET:
-        case ZSET:  if(true==add_tabs) ss << Tab(deep); ss << "(" << std::endl; break;
-        case HASH:  if(true==add_tabs) ss << Tab(deep); ss << "{" << std::endl; break;
+        case ZSET:  if(true==add_tabs) ss << AddTab(deep); ss << "(" << std::endl; break;
+        case HASH:  if(true==add_tabs) ss << AddTab(deep); ss << "{" << std::endl; break;
     }
 
     switch(type())
@@ -469,10 +521,10 @@ std::string Value::ValueToString(int deep, bool add_tabs) const
 
     switch(type())
     {
-        case LIST:  ss << std::endl << Tab(deep) << "]"; break;
+        case LIST:  ss << std::endl << AddTab(deep) << "]"; break;
         case SET:
-        case ZSET:  ss << std::endl << Tab(deep) << ")"; break;
-        case HASH:  ss << std::endl << Tab(deep) << "}"; break;
+        case ZSET:  ss << std::endl << AddTab(deep) << ")"; break;
+        case HASH:  ss << std::endl << AddTab(deep) << "}"; break;
     }
 
     return ss.str();
@@ -488,37 +540,37 @@ std::string Value::UnaryContainerToString(const T& val, int deep) const
         switch(iter.type())
         {
             case INVALID:
-                ss << Tab(deep);
+                ss << AddTab(deep);
                 ss << "nil";
                 break;
 
             case BOOLEAN:
-                ss << Tab(deep);
+                ss << AddTab(deep);
                 ss << std::boolalpha << iter.GetBoolean() << std::noboolalpha;
                 break;
 
             case INT:
-                ss << Tab(deep);
+                ss << AddTab(deep);
                 ss << iter.GetInt();
                 break;
 
             case UINT:
-                ss << Tab(deep);
+                ss << AddTab(deep);
                 ss << iter.GetUInt();
                 break;
 
             case FLOAT:
-                ss << Tab(deep);
+                ss << AddTab(deep);
                 ss << iter.GetFloat();
                 break;
 
             case STRING:
-                ss << Tab(deep);
+                ss << AddTab(deep);
                 ss << "\"" << iter.GetString() << "\"";
                 break;
 
             case BINARY:
-                ss << Tab(deep);
+                ss << AddTab(deep);
                 ss << "x\'" << BinToString(iter.GetBinary().data(), iter.GetBinary().size());
                 break;
 
@@ -559,7 +611,7 @@ std::string Value::BinaryContainerToString(const T& val, int deep) const
 
     for(auto iter : val)
     {
-        ss << Tab(deep);
+        ss << AddTab(deep);
         ss << iter.first << ":";
 
         switch(iter.second.type())
@@ -622,7 +674,7 @@ std::string Value::BinaryContainerToString(const T& val, int deep) const
     return str;
 }
 //---------------------------------------------------------------------------
-std::string Value::Tab(int deep) const
+std::string Value::AddTab(int deep) const
 {
     std::string str;
     for(int i=0; i<deep; i++)

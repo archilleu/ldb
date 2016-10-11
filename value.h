@@ -46,8 +46,8 @@ public:
     using String    = std::string;
     using List      = std::list<Value>;
     using Set       = std::unordered_set<Value, HashFunc>;
-    using ZSet      = std::unordered_multimap<double, Value>;
-    using Hash      = std::map<String, Value>;
+    using ZSet      = std::multimap<double, Value>;
+    using Hash      = std::unordered_map<String, Value>;
 
     //Constructor
     explicit Value(TYPE t=INVALID);
@@ -141,6 +141,14 @@ public:
     bool operator==(const Value& val) const;
     bool operator!=(const Value& val) const;
 
+    Value& operator[](const char* key);
+    Value& operator[](const String& key);
+    const Value& operator[](const char* key) const;
+    const Value& operator[](const String& key) const;
+
+    Value::List operator[](double score) const;
+
+    //output
     friend std::ostream& operator<<(std::ostream& out, const Value& val);
 
 private:
@@ -148,7 +156,7 @@ private:
     template<typename T>std::string UnaryContainerToString(const T& val, int deep) const;
     template<typename T>std::string BinaryContainerToString(const T& val, int deep) const;
 
-    std::string Tab(int deep) const;
+    std::string AddTab(int deep) const;
 
 private:
     short type_;

@@ -29,6 +29,7 @@ bool TestValue::DoTest()
     if(false == TestZSet())  return false;
     if(false == TestHash())  return false;
     if(false == TestMix())  return false;
+    if(false == TestOverload())  return false;
 
     return true;
 }
@@ -677,6 +678,129 @@ bool TestValue::TestMix()
 
     return true;
 }
+//---------------------------------------------------------------------------
+bool TestValue::TestOverload()
+{
+    Value::List list;
+    list.push_back(Value());
+    list.push_back(Value(true));
+    list.push_back(Value(false));
+    list.push_back(Value(int64_t(LONG_LONG_MAX)));
+    list.push_back(Value(uint64_t(ULONG_LONG_MAX)));
+    list.push_back(Value(DBL_MAX));
+    list.push_back(Value("string"));
+
+    Value::Set set;
+    set.insert(Value());
+    set.insert(Value(true));
+    set.insert(Value(true));
+    set.insert(Value(false));
+    set.insert(Value(int64_t(LONG_LONG_MAX)));
+    set.insert(Value(uint64_t(ULONG_LONG_MAX)));
+    set.insert(Value(DBL_MAX));
+    set.insert(Value("string"));
+
+    Value::ZSet zset;
+    zset.emplace(1, Value());
+    zset.emplace(2, Value(true));
+    zset.emplace(3, Value(true));
+    zset.emplace(4, Value(false));
+    zset.emplace(5, Value(int64_t(LONG_LONG_MAX)));
+    zset.emplace(6, Value(uint64_t(ULONG_LONG_MAX)));
+    zset.emplace(7, Value(DBL_MAX));
+    zset.emplace(8, Value("string"));
+
+    Value::Hash hash;
+    hash.emplace("key0", Value());
+    hash.emplace("key1", Value(true));
+    hash.emplace("key2", Value(true));
+    hash.emplace("key3", Value(false));
+    hash.emplace("key4", Value(int64_t(LONG_LONG_MAX)));
+    hash.emplace("key5", Value(uint64_t(ULONG_LONG_MAX)));
+    hash.emplace("key6", Value(DBL_MAX));
+    hash.emplace("key7", Value("string"));
+    hash.emplace("key7", Value("dup string"));
+
+    Value::List l1(list);
+    Value::Set s1(set);
+    Value::ZSet zs1(zset);
+    Value::Hash h1(hash);
+
+    l1.push_back(Value(list));
+    l1.push_back(Value(set));
+    l1.push_back(Value(zset));
+    l1.push_back(Value(hash));
+
+    s1.insert(Value(list));
+    s1.insert(Value(set));
+    s1.insert(Value(zset));
+    s1.insert(Value(hash));
+
+    zs1.emplace(9, Value(list));
+    zs1.emplace(9, Value(set));
+    zs1.emplace(9, Value(zset));
+    zs1.emplace(9, Value(hash));
+
+    h1.emplace("key8", Value(list));
+    h1.emplace("key9", Value(set));
+    h1.emplace("key10", Value(zset));
+    h1.emplace("key11", Value(hash));
+
+    Value o(Value::TYPE::HASH);
+    o["list"] = Value(l1);
+    o["set"] = Value(s1);
+    o["zset"] = Value(zs1);
+    o["hash"] = Value(h1);
+
+    std::cout << "================" << std::endl;
+        std::cout << o << std::endl;
+    std::cout << "================" << std::endl;
+
+    //hash[]
+    MY_ASSERT(o["hash"]["key0"] == Value());
+    MY_ASSERT(o["hash"]["key1"] == Value(true));
+    MY_ASSERT(o["hash"]["key2"] == Value(true));
+    MY_ASSERT(o["hash"]["key3"] == Value(false));
+    MY_ASSERT(o["hash"]["key4"] == Value(int64_t(LONG_LONG_MAX)));
+    MY_ASSERT(o["hash"]["key5"] == Value(uint64_t(ULONG_LONG_MAX)));
+    MY_ASSERT(o["hash"]["key6"] == Value(DBL_MAX));
+    MY_ASSERT(o["hash"]["key7"] == Value("string"));
+    o["hash"]["key7"] = Value("new string");
+    std::cout << o["hash"]["key7"] << std::endl;
+
+    //zset[]
+    Value::List zl1 = o["zset"][1];
+    std::cout << "nil:" << Value(zl1) << std::endl;
+
+    Value::List zl2 = o["zset"][2];
+    Value zlv1(zl2);
+    std::cout << "true:" << zlv1 << std::endl;
+    zl2.begin()->SetBoolean(false);
+    Value zlv2(zl2);
+    std::cout << "true:" << zlv1 << std::endl;
+    std::cout << "false:" << zlv2 << std::endl;
+
+    Value::List zl3 = o["zset"][3];
+    std::cout << "true:" << Value(zl3) << std::endl;
+
+    Value::List zl4 = o["zset"][4];
+    std::cout << "false:" << Value(zl4) << std::endl;
+
+    Value::List zl5 = o["zset"][5];
+    std::cout << "LL:" << Value(zl5) << std::endl;
+
+    Value::List zl6 = o["zset"][6];
+    std::cout << "ULL:" << Value(zl6) << std::endl;
+
+    Value::List zl7 = o["zset"][7];
+    std::cout << "FM:" << Value(zl7) << std::endl;
+
+    Value::List zl8 = o["zset"][8];
+    std::cout << "string:" << Value(zl8) << std::endl;
+
+    return true;
+}
+
 //---------------------------------------------------------------------------
 }// namespace test
 
