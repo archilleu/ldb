@@ -17,17 +17,17 @@ namespace test
 //---------------------------------------------------------------------------
 bool TestValue::DoTest()
 {
-    if(false == TestInvaild())  return false;
-    if(false == TestBoolean())  return false;
-    if(false == TestInt())  return false;
-    if(false == TestUInt())  return false;
-    if(false == TestFloat())  return false;
-    if(false == TestBinary())  return false;
-    if(false == TestString())  return false;
-    if(false == TestList())  return false;
-    if(false == TestSet())  return false;
+    //if(false == TestInvaild())  return false;
+    //if(false == TestBoolean())  return false;
+    //if(false == TestInt())  return false;
+    //if(false == TestUInt())  return false;
+    //if(false == TestFloat())  return false;
+    //if(false == TestBinary())  return false;
+    //if(false == TestString())  return false;
+    //if(false == TestList())  return false;
+    //if(false == TestSet())  return false;
     if(false == TestZSet())  return false;
-    if(false == TestHash())  return false;
+    //if(false == TestHash())  return false;
 
     return true;
 }
@@ -317,11 +317,12 @@ bool TestValue::TestString()
 //---------------------------------------------------------------------------
 bool TestValue::TestList()
 {
-    const int size = 6;
+    const int size = 3;
     Value::List list1(size, Value(true));
     Value::List list2(size, Value(false));
 
     Value o(list1);
+    std::cout << o << std::endl;
     MY_ASSERT(o.type() == Value::TYPE_LIST);
     MY_ASSERT(list1 == o.GetList());
     MY_ASSERT(o.SetList(list2));
@@ -359,6 +360,12 @@ bool TestValue::TestList()
     val.push_back(Value(uint64_t(ULONG_LONG_MAX)));
     val.push_back(Value(3.14));
     val.push_back(Value("string"));
+    val.push_back(Value(Value::List(1,Value(false))));
+    val.push_back(Value(Value::List(1,Value("3.14"))));
+    val.push_back(Value(Value::List(1,Value("ss"))));
+    val.push_back(Value("string"));
+    val.push_back(Value(Value::List(1,Value())));
+    val.push_back(Value(Value::List(1,Value("1"))));
     std::cout << om << std::endl;
 
     MY_ASSERT(o.type() == Value::TYPE_INVALID);
@@ -430,6 +437,11 @@ bool TestValue::TestSet()
     val.insert(Value(int64_t(LONG_LONG_MAX)));
     val.insert(Value(uint64_t(ULONG_LONG_MAX)));
     val.insert(Value(3.14));
+    std::cout << om << std::endl;
+    val.insert(Value(val));
+    val.insert(Value("string"));
+    val.insert(Value("string"));
+    val.insert(Value("string"));
     val.insert(Value("string"));
     std::cout << om << std::endl;
 
@@ -444,57 +456,58 @@ bool TestValue::TestZSet()
 {
     Value::ZSet zset1;
     Value::ZSet zset2;
-//    zset1.emplace(1.0, Value(true));
-//    zset2.emplace(1.0, Value(false));
-//    zset1.emplace(1.0, Value(int64_t(1)));
-//    zset2.emplace(1.0, Value(int64_t(2)));
-//    zset1.emplace(1.0, Value(1.0));
-//    zset2.emplace(1.0, Value(2.0));
+    zset1.emplace(1.0, Value(true));
+    zset2.emplace(2.0, Value(false));
+    zset1.emplace(1.0, Value(int64_t(LONG_LONG_MAX)));
+    zset2.emplace(2.0, Value(int64_t(LONG_LONG_MAX)));
+    zset1.emplace(1.0, Value(1.0));
+    zset2.emplace(2.0, Value(2.0));
     zset1.emplace(1.0, Value("string1"));
-//    zset2.emplace(1.0, Value("string2"));
+    zset2.emplace(2.0, Value("string2"));
 
     Value o(zset1);
     MY_ASSERT(Value(zset1) == o);
     std::cout << o << std::endl;
-    MY_ASSERT(o.type() == Value::TYPE_SET);
+    MY_ASSERT(o.type() == Value::TYPE_ZSET);
     MY_ASSERT(zset1 == o.GetZSet());
     MY_ASSERT(o.SetZSet(zset2));
     MY_ASSERT(zset2 == o.GetZSet());
-    MY_ASSERT(o.type() == Value::TYPE_SET);
+    MY_ASSERT(o.type() == Value::TYPE_ZSET);
     MY_ASSERT(Value(zset1) != o);
     MY_ASSERT(Value(zset2) == o);
     std::cout << o << std::endl;
 
     Value o1(zset1);
-    MY_ASSERT(o1.type() == Value::TYPE_SET);
+    MY_ASSERT(o1.type() == Value::TYPE_ZSET);
     MY_ASSERT(zset1 == o1.GetZSet());
     MY_ASSERT(o1.SetZSet(Value::ZSet(zset2)));
     MY_ASSERT(zset2 == o1.GetZSet());
-    MY_ASSERT(o1.type() == Value::TYPE_SET);
+    MY_ASSERT(o1.type() == Value::TYPE_ZSET);
 
     Value oc(o);
     MY_ASSERT(oc == o);
     MY_ASSERT(false == oc.obj().unique());
-    MY_ASSERT(oc.type() == Value::TYPE_SET);
+    MY_ASSERT(oc.type() == Value::TYPE_ZSET);
     MY_ASSERT(zset2  == oc.GetZSet());
     MY_ASSERT(oc.SetZSet(zset1));
     MY_ASSERT(zset1 == oc.GetZSet());
-    MY_ASSERT(oc.type() == Value::TYPE_SET);
+    MY_ASSERT(oc.type() == Value::TYPE_ZSET);
 
     Value om(std::move(o));
     MY_ASSERT(oc != o);
     MY_ASSERT(om.obj().unique());
-    MY_ASSERT(om.type() == Value::TYPE_SET);
+    MY_ASSERT(om.type() == Value::TYPE_ZSET);
     MY_ASSERT(zset2 == om.GetZSet());
     MY_ASSERT(om.SetZSet(zset1));
     MY_ASSERT(zset1 == om.GetZSet());
-    MY_ASSERT(om.type() == Value::TYPE_SET);
+    MY_ASSERT(om.type() == Value::TYPE_ZSET);
 
     auto& val = om.GetZSet();
+    val.emplace(3.0, Value(val)); 
     val.emplace(1.0, Value(int64_t(LONG_LONG_MAX)));
     val.emplace(1.0, Value(uint64_t(ULONG_LONG_MAX)));
     val.emplace(1.0, Value(3.14));
-    val.emplace(1.0, Value("string"));
+    val.emplace(2.0, Value("string"));
     std::cout << om << std::endl;
 
     MY_ASSERT(o.type() == Value::TYPE_INVALID);

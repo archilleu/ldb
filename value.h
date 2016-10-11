@@ -136,12 +136,23 @@ public:
     const std::shared_ptr<void>& obj() const { return obj_; }
     std::shared_ptr<void>& obj() { return obj_; }
 
+public:
     //operator overload
     bool operator==(const Value& val) const;
     bool operator!=(const Value& val) const;
 
-    friend std::stringstream& operator<<(std::stringstream& out, const Value& val);
     friend std::ostream& operator<<(std::ostream& out, const Value& val);
+
+private:
+    std::string ValueToString(int deep=0, bool add_tabs=true) const;
+    template<typename T> std::string UnaryContainerToString(const T& val, int deep) const;
+    template<typename T> std::string BinaryContainerToString(const T& val, int deep) const;
+    std::string ListToString(const Value::List& val, int deep) const;
+    std::string SetToString(const Value::Set& val, int deep) const;
+    std::string ZSetToString(const Value::ZSet& val, int deep) const;
+    std::string HashToString(const Value::Hash& val, int deep) const;
+
+    std::string Tab(int deep) const;
 
 private:
     short type_;
@@ -150,7 +161,6 @@ private:
 using ValuePtr = std::shared_ptr<Value>;
 //---------------------------------------------------------------------------
 //operator overload
-std::stringstream& operator<<(std::stringstream& out, const Value& val);
 std::ostream& operator<<(std::ostream& out, const Value& val);
 
 }//namespace db

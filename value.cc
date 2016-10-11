@@ -385,184 +385,226 @@ static std::string BinToString(const unsigned char* buffer, size_t len)
      return result;
 }
 //---------------------------------------------------------------------------
-static std::string ListToString(const Value::List& val);
-static std::string SetToString(const Value::Set& val);
-static std::string ZSetToString(const Value::ZSet& val);
-static std::string HashToString(const Value::Hash& val);
-//---------------------------------------------------------------------------
-static std::string ListToString(const Value::List& val)
+std::string Value::ValueToString(int deep, bool add_tabs) const
 {
     std::stringstream ss;
-    ss << "[";
+
+    switch(type())
+    {
+        case Value::TYPE_LIST:  if(true==add_tabs) ss << Tab(deep); ss << "[" << std::endl; break;
+        case Value::TYPE_SET:
+        case Value::TYPE_ZSET:  if(true==add_tabs) ss << Tab(deep); ss << "(" << std::endl; break;
+        case Value::TYPE_HASH:  if(true==add_tabs) ss << Tab(deep); ss << "{" << std::endl; break;
+    }
+
+    switch(type())
+    {
+        case Value::TYPE_INVALID:
+            ss << "nil";
+            break;
+
+        case Value::TYPE_BOOLEAN: 
+            ss << std::boolalpha << GetBoolean() << std::noboolalpha;
+            break;
+
+        case Value::TYPE_INT: 
+            ss << GetInt();
+            break;
+
+        case Value::TYPE_UINT: 
+            ss << GetUInt();
+            break;
+
+        case Value::TYPE_FLOAT: 
+            ss << GetFloat();
+            break;
+
+        case Value::TYPE_STRING: 
+            ss << "\"" << GetString() << "\"";
+            break;
+
+        case Value::TYPE_BINARY:
+            ss << "x\'" << BinToString(GetBinary().data(), GetBinary().size());
+            break;
+
+        case Value::TYPE_LIST:
+            ss << UnaryContainerToString(GetList(), deep+1);
+            break;
+
+        case Value::TYPE_SET:
+            ss << UnaryContainerToString(GetSet(), deep+1);
+            break;
+
+        case Value::TYPE_ZSET:
+            ss << BinaryContainerToString(GetZSet(), deep+1);
+            break;
+
+        case Value::TYPE_HASH:
+            ss << BinaryContainerToString(GetHash(), deep+1);
+            break;
+    }
+
+    switch(type())
+    {
+        case Value::TYPE_LIST:  ss << std::endl << Tab(deep) << "]"; break;
+        case Value::TYPE_SET:
+        case Value::TYPE_ZSET:  ss << std::endl << Tab(deep) << ")"; break;
+        case Value::TYPE_HASH:  ss << std::endl << Tab(deep) << "}"; break;
+    }
+
+    return ss.str();
+}
+//---------------------------------------------------------------------------
+template<typename T>
+std::string Value::UnaryContainerToString(const T& val, int deep) const
+{
+    std::stringstream ss;
 
     for(auto iter : val)
     {
         switch(iter.type())
         {
-            case Value::TYPE_INVALID:
+            case TYPE_INVALID:
+                ss << Tab(deep);
                 ss << "nil";
                 break;
 
-            case Value::TYPE_BOOLEAN: 
+            case TYPE_BOOLEAN: 
+                ss << Tab(deep);
                 ss << std::boolalpha << iter.GetBoolean() << std::noboolalpha;
                 break;
 
-            case Value::TYPE_INT: 
+            case TYPE_INT: 
+                ss << Tab(deep);
                 ss << iter.GetInt();
                 break;
 
-            case Value::TYPE_UINT: 
+            case TYPE_UINT: 
+                ss << Tab(deep);
                 ss << iter.GetUInt();
                 break;
 
-            case Value::TYPE_FLOAT: 
+            case TYPE_FLOAT: 
+                ss << Tab(deep);
                 ss << iter.GetFloat();
                 break;
 
-            case Value::TYPE_STRING: 
+            case TYPE_STRING: 
+                ss << Tab(deep);
                 ss << "\"" << iter.GetString() << "\"";
                 break;
 
-            case Value::TYPE_BINARY:
+            case TYPE_BINARY:
+                ss << Tab(deep);
                 ss << "x\'" << BinToString(iter.GetBinary().data(), iter.GetBinary().size());
                 break;
 
-            case Value::TYPE_LIST:
-                ss << ListToString(iter.GetList());
+            case TYPE_LIST:
+                ss << iter.ValueToString(deep);
                 break;
 
-            case Value::TYPE_SET:
-                ss << SetToString(iter.GetSet());
+            case TYPE_SET:
+                ss << iter.ValueToString(deep);
                 break;
 
-            case Value::TYPE_ZSET:
-                ss << ZSetToString(ss.GetZSet());
+            case TYPE_ZSET:
+                ss << iter.ValueToString(deep);
                 break;
 
-            case Value::TYPE_HASH:
-                out << HashToString(val.GetHash());
+            case TYPE_HASH:
+                ss << iter.ValueToString(deep);
                 break;
         }
-            ss << iter << ", ";
+
+        ss << "," << std::endl;
     }
 
+
     std::string str = ss.str();
-    str.pop_back();str.pop_back();
-    str += "]";
+    str.pop_back(); str.pop_back(); 
 
     return str;
 }
 //---------------------------------------------------------------------------
-static std::string SetToString(const Value::Set& val)
+template<typename T>
+std::string Value::BinaryContainerToString(const T& val, int deep) const
 {
     std::stringstream ss;
-    ss << "(";
-
-    for(auto iter : val)
-        ss << iter << ", ";
-
-    std::string str = ss.str();
-    str.pop_back();str.pop_back();
-    str += ")";
-
-    return str;
-}
-//---------------------------------------------------------------------------
-static std::string ZSetToString(const Value::ZSet& val)
-{
-    std::stringstream ss;
-    ss << "(";
 
     for(auto iter : val)
     {
+        ss << Tab(deep);
         ss << iter.first << ":";
-         ss << iter.second << ", ";
+
+        switch(iter.second.type())
+        {
+            case TYPE_INVALID:
+                ss << "nil";
+                break;
+
+            case TYPE_BOOLEAN: 
+                ss << std::boolalpha << iter.second.GetBoolean() << std::noboolalpha;
+                break;
+
+            case TYPE_INT: 
+                ss << iter.second.GetInt();
+                break;
+
+            case TYPE_UINT: 
+                ss << iter.second.GetUInt();
+                break;
+
+            case TYPE_FLOAT: 
+                ss << iter.second.GetFloat();
+                break;
+
+            case TYPE_STRING: 
+                ss << "\"" << iter.second.GetString() << "\"";
+                break;
+
+            case TYPE_BINARY:
+                ss << "x\'" << BinToString(iter.second.GetBinary().data(), iter.second.GetBinary().size());
+                break;
+
+            case TYPE_LIST:
+                ss << iter.second.ValueToString(deep, false);
+                break;
+
+            case TYPE_SET:
+                ss << iter.second.ValueToString(deep, false);
+                break;
+
+            case TYPE_ZSET:
+                ss << iter.second.ValueToString(deep, false);
+                break;
+
+            case TYPE_HASH:
+                ss << iter.second.ValueToString(deep, false);
+                break;
+        }
+
+        ss << "," << std::endl;
     }
 
     std::string str = ss.str();
     str.pop_back();str.pop_back();
-    str += ")";
 
     return str;
 }
 //---------------------------------------------------------------------------
-static std::string HashToString(const Value::Hash& val)
+std::string Value::Tab(int deep) const
 {
-    std::stringstream ss;
-    ss << "{";
-
-    for(auto iter : val)
-        ss << "\"" << iter.first << "\"" << ":" << iter.second << ", ";
-
-    std::string str = ss.str();
-    str.pop_back();str.pop_back();
-    str += "}";
+    std::string str;
+    for(int i=0; i<deep; i++)
+        str += "\t";
 
     return str;
-}
-//---------------------------------------------------------------------------
-std::stringstream& operator<<(std::stringstream& out, const Value& val)
-{
-    out << "\t";
-    switch(val.type())
-    {
-        case Value::TYPE_INVALID:
-            out << "nil";
-            break;
-
-        case Value::TYPE_BOOLEAN: 
-            out << std::boolalpha << val.GetBoolean() << std::noboolalpha;
-            break;
-
-        case Value::TYPE_INT: 
-            out << val.GetInt();
-            break;
-
-        case Value::TYPE_UINT: 
-            out << val.GetUInt();
-            break;
-
-        case Value::TYPE_FLOAT: 
-            out << val.GetFloat();
-            break;
-
-        case Value::TYPE_STRING: 
-            out << "\"" << val.GetString() << "\"";
-            break;
-
-        case Value::TYPE_BINARY:
-            out << "x\'" << BinToString(val.GetBinary().data(), val.GetBinary().size());
-            break;
-
-        case Value::TYPE_LIST:
-            out << ListToString(val.GetList());
-            break;
-
-        case Value::TYPE_SET:
-            out << SetToString(val.GetSet());
-            break;
-
-        case Value::TYPE_ZSET:
-            out << ZSetToString(val.GetZSet());
-            break;
-
-        case Value::TYPE_HASH:
-            out << HashToString(val.GetHash());
-            break;
-    }
-
-    out << std::endl;
-    return out;
 }
 //---------------------------------------------------------------------------
 std::ostream& operator<<(std::ostream& out, const Value& val)
 {
-    std::stringstream ss;
-    ss << val;
-
-    std::cout << "{" << std::endl;
-        std::cout << ss.str();
-    std::cout << "}" << std::endl;
+    std::string str = val.ValueToString(0);
+    out << str;
 
     return out;
 }
