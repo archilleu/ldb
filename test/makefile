@@ -32,11 +32,11 @@ all:$(TARGET_NAME)
 value.o : ../value.cc
 	$(CXX) $(CXX_FLAGS) -c ../value.cc
 
-#ldb.o : ../ldb.cc
-	#$(CXX) $(CXX_FLAGS) -c ../ldb.cc
+ldb.o : ../ldb.cc
+	$(CXX) $(CXX_FLAGS) -c ../ldb.cc
 
-$(TARGET_NAME):$(OBJS) value.o
-	$(CXX) $(OBJS) value.o -o $(TARGET_NAME) $(SHARE_LIP_PATH) $(SHARE_LIB) $(PUBLIC_SHARE_LIB)
+$(TARGET_NAME):$(OBJS) value.o ldb.o
+	$(CXX) $(OBJS) value.o ldb.o -o $(TARGET_NAME) $(SHARE_LIP_PATH) $(SHARE_LIB) $(PUBLIC_SHARE_LIB)
 
 .PHONY:clean
 clean:

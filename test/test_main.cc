@@ -12,8 +12,8 @@ TestMain::TestMain()
 {
 #define TEST_ADD(TypeName)   test_obj_list_[#TypeName]=std::shared_ptr<TestBase>(dynamic_cast<TestBase*>(new TypeName))
 
-    TEST_ADD(TestValue);
-    //TEST_ADD(TestLdb);
+    //TEST_ADD(TestValue);
+    TEST_ADD(TestLdb);
 
 #undef TEST_ADD
 }
