@@ -10,7 +10,7 @@ ObjectPtr Ldb::kNullObject = std::make_shared<Object>(TYPE_INT, std::make_shared
 //---------------------------------------------------------------------------
 bool Ldb::UnarySetBoolean(const String& key, bool val)
 {
-    ObjectPtr obj_val = std::make_shared<Object>(TYPE_BOOLEAN, std::make_shared<bool>(val));
+    ObjectPtr obj_val = std::make_shared<Object>(BOOLEAN, std::make_shared<bool>(val));
 
     return UnarySet(key, obj_val);
 }
@@ -70,7 +70,7 @@ bool Ldb::UnaryGetBoolean(const String& key, bool* val)
     if(dict_.end() == iter)
         return false;
 
-    if(TYPE_BOOLEAN == iter->second->type())
+    if(BOOLEAN == iter->second->type())
     {
         *val = *reinterpret_cast<bool*>(iter->second->obj().get());
         return true;

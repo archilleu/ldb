@@ -45,10 +45,10 @@
 //    ObjectPtr& oval_bf  = ldb.ObjectGet(key_bf);
 //    const ObjectPtr& coval_bt  = ldb.ObjectGet(key_bt);
 //    const ObjectPtr& coval_bf  = ldb.ObjectGet(key_bf);
-//    MY_ASSERT(TYPE_BOOLEAN == oval_bt->type());
-//    MY_ASSERT(TYPE_BOOLEAN == oval_bf->type());
-//    MY_ASSERT(TYPE_BOOLEAN == coval_bt->type());
-//    MY_ASSERT(TYPE_BOOLEAN == coval_bf->type());
+//    MY_ASSERT(BOOLEAN == oval_bt->type());
+//    MY_ASSERT(BOOLEAN == oval_bf->type());
+//    MY_ASSERT(BOOLEAN == coval_bt->type());
+//    MY_ASSERT(BOOLEAN == coval_bf->type());
 //
 //    const ObjectPtr& coval_null = ldb.ObjectGet("invalid");
 //    ObjectPtr& oval_null = ldb.ObjectGet("invalid");

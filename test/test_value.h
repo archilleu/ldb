@@ -35,6 +35,7 @@ private:
     bool TestSet();
     bool TestZSet();
     bool TestHash();
+    bool TestMix();
 };
 
 }// namespace test

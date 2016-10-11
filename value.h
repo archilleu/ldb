@@ -20,19 +20,19 @@ class Value
 {
 public:
     //value type define
-    enum
+    enum TYPE
     {
-        TYPE_INVALID= 0,
-        TYPE_BOOLEAN,
-        TYPE_INT,
-        TYPE_UINT,
-        TYPE_FLOAT,
-        TYPE_BINARY,
-        TYPE_STRING,
-        TYPE_LIST,
-        TYPE_SET,
-        TYPE_ZSET,
-        TYPE_HASH
+        INVALID= 0,
+        BOOLEAN,
+        INT,
+        UINT,
+        FLOAT,
+        BINARY,
+        STRING,
+        LIST,
+        SET,
+        ZSET,
+        HASH
     };
 
     //hash function(for unordered_set)
@@ -50,37 +50,37 @@ public:
     using Hash      = std::map<String, Value>;
 
     //Constructor
-    Value():type_(TYPE_INVALID){}
-    explicit Value(bool val):type_(TYPE_BOOLEAN), obj_(std::make_shared<bool>(val)){}
-    explicit Value(int64_t val):type_(TYPE_INT), obj_(std::make_shared<int64_t>(val)){}
-    explicit Value(uint64_t val):type_(TYPE_UINT), obj_(std::make_shared<uint64_t>(val)){}
-    explicit Value(double val):type_(TYPE_FLOAT), obj_(std::make_shared<double>(val)){}
+    explicit Value(TYPE t=INVALID);
+    explicit Value(bool val):type_(BOOLEAN), obj_(std::make_shared<bool>(val)){}
+    explicit Value(int64_t val):type_(INT), obj_(std::make_shared<int64_t>(val)){}
+    explicit Value(uint64_t val):type_(UINT), obj_(std::make_shared<uint64_t>(val)){}
+    explicit Value(double val):type_(FLOAT), obj_(std::make_shared<double>(val)){}
 
-    explicit Value(const Binary& val):type_(TYPE_BINARY), obj_(std::make_shared<Binary>(val)){}
-    explicit Value(Binary&& val):type_(TYPE_BINARY), obj_(std::make_shared<Binary>(std::move(val))){}
+    explicit Value(const Binary& val):type_(BINARY), obj_(std::make_shared<Binary>(val)){}
+    explicit Value(Binary&& val):type_(BINARY), obj_(std::make_shared<Binary>(std::move(val))){}
 
-    explicit Value(const char* val):type_(TYPE_STRING), obj_(std::make_shared<String>(val)){}
-    explicit Value(const String& val):type_(TYPE_STRING), obj_(std::make_shared<String>(val)){}
-    explicit Value(String&& val):type_(TYPE_STRING), obj_(std::make_shared<String>(std::move(val))){}
+    explicit Value(const char* val):type_(STRING), obj_(std::make_shared<String>(val)){}
+    explicit Value(const String& val):type_(STRING), obj_(std::make_shared<String>(val)){}
+    explicit Value(String&& val):type_(STRING), obj_(std::make_shared<String>(std::move(val))){}
 
-    explicit Value(const List& val):type_(TYPE_LIST), obj_(std::make_shared<List>(val)){}
-    explicit Value(List&& val):type_(TYPE_LIST), obj_(std::make_shared<List>(std::move(val))){}
+    explicit Value(const List& val):type_(LIST), obj_(std::make_shared<List>(val)){}
+    explicit Value(List&& val):type_(LIST), obj_(std::make_shared<List>(std::move(val))){}
 
-    explicit Value(const Set& val):type_(TYPE_SET), obj_(std::make_shared<Set>(val)){}
-    explicit Value(Set&& val):type_(TYPE_SET), obj_(std::make_shared<Set>(std::move(val))){}
+    explicit Value(const Set& val):type_(SET), obj_(std::make_shared<Set>(val)){}
+    explicit Value(Set&& val):type_(SET), obj_(std::make_shared<Set>(std::move(val))){}
 
-    explicit Value(const ZSet& val):type_(TYPE_ZSET), obj_(std::make_shared<ZSet>(val)){}
-    explicit Value(ZSet&& val):type_(TYPE_ZSET), obj_(std::make_shared<ZSet>(std::move(val))){}
+    explicit Value(const ZSet& val):type_(ZSET), obj_(std::make_shared<ZSet>(val)){}
+    explicit Value(ZSet&& val):type_(ZSET), obj_(std::make_shared<ZSet>(std::move(val))){}
 
-    explicit Value(const Hash& val):type_(TYPE_HASH), obj_(std::make_shared<Hash>(val)){}
-    explicit Value(Hash&& val):type_(TYPE_HASH), obj_(std::make_shared<Hash>(std::move(val))){}
+    explicit Value(const Hash& val):type_(HASH), obj_(std::make_shared<Hash>(val)){}
+    explicit Value(Hash&& val):type_(HASH), obj_(std::make_shared<Hash>(std::move(val))){}
 
     Value(const Value& o) { *this = o; }    //lazy copy
     Value(Value&& o) { *this = std::move(o); }
 
     Value& operator=(const Value& o){ type_=o.type_; obj_=o.obj_; return *this; }   //lazy copy
     Value& operator=(Value&& o){
-        type_=o.type_; obj_=std::move(o.obj_); o.type_=TYPE_INVALID; o.obj_.reset(); return *this; }
+        type_=o.type_; obj_=std::move(o.obj_); o.type_=INVALID; o.obj_.reset(); return *this; }
 
     //Set method
     bool SetBoolean(bool val);
@@ -107,28 +107,28 @@ public:
     bool SetHash(Hash&& val);
 
     //Get method
-    bool GetBoolean() const { assert(TYPE_BOOLEAN); return *std::static_pointer_cast<bool>(obj_); }
-    int64_t GetInt() const { assert(TYPE_INT); return *std::static_pointer_cast<int64_t>(obj_); }
-    uint64_t GetUInt() const { assert(TYPE_UINT); return *std::static_pointer_cast<uint64_t>(obj_); }
-    double GetFloat() const { assert(TYPE_FLOAT); return *std::static_pointer_cast<double>(obj_); }
+    bool GetBoolean() const { assert(BOOLEAN); return *std::static_pointer_cast<bool>(obj_); }
+    int64_t GetInt() const { assert(INT); return *std::static_pointer_cast<int64_t>(obj_); }
+    uint64_t GetUInt() const { assert(UINT); return *std::static_pointer_cast<uint64_t>(obj_); }
+    double GetFloat() const { assert(FLOAT); return *std::static_pointer_cast<double>(obj_); }
 
-    const Binary& GetBinary() const { assert(TYPE_BINARY); return *std::static_pointer_cast<Binary>(obj_); }
-    Binary& GetBinary() { assert(TYPE_BINARY); return *std::static_pointer_cast<Binary>(obj_); }
+    const Binary& GetBinary() const { assert(BINARY); return *std::static_pointer_cast<Binary>(obj_); }
+    Binary& GetBinary() { assert(BINARY); return *std::static_pointer_cast<Binary>(obj_); }
 
-    const String& GetString() const { assert(TYPE_STRING); return *std::static_pointer_cast<String>(obj_); }
-    String& GetString() { assert(TYPE_STRING); return *std::static_pointer_cast<String>(obj_); }
+    const String& GetString() const { assert(STRING); return *std::static_pointer_cast<String>(obj_); }
+    String& GetString() { assert(STRING); return *std::static_pointer_cast<String>(obj_); }
 
-    const List& GetList() const { assert(TYPE_LIST); return *std::static_pointer_cast<List>(obj_); }
-    List& GetList() { assert(TYPE_LIST); return *std::static_pointer_cast<List>(obj_); }
+    const List& GetList() const { assert(LIST); return *std::static_pointer_cast<List>(obj_); }
+    List& GetList() { assert(LIST); return *std::static_pointer_cast<List>(obj_); }
 
-    const Set& GetSet() const { assert(TYPE_SET); return *std::static_pointer_cast<Set>(obj_); }
-    Set& GetSet() { assert(TYPE_SET); return *std::static_pointer_cast<Set>(obj_); }
+    const Set& GetSet() const { assert(SET); return *std::static_pointer_cast<Set>(obj_); }
+    Set& GetSet() { assert(SET); return *std::static_pointer_cast<Set>(obj_); }
 
-    const ZSet& GetZSet() const { assert(TYPE_ZSET); return *std::static_pointer_cast<ZSet>(obj_); }
-    ZSet& GetZSet() { assert(TYPE_ZSET); return *std::static_pointer_cast<ZSet>(obj_); }
+    const ZSet& GetZSet() const { assert(ZSET); return *std::static_pointer_cast<ZSet>(obj_); }
+    ZSet& GetZSet() { assert(ZSET); return *std::static_pointer_cast<ZSet>(obj_); }
 
-    const Hash& GetHash() const { assert(TYPE_HASH); return *std::static_pointer_cast<Hash>(obj_); }
-    Hash& GetHash() { assert(TYPE_HASH); return *std::static_pointer_cast<Hash>(obj_); }
+    const Hash& GetHash() const { assert(HASH); return *std::static_pointer_cast<Hash>(obj_); }
+    Hash& GetHash() { assert(HASH); return *std::static_pointer_cast<Hash>(obj_); }
 
     //normal method
     short type() const { return type_; }
@@ -145,12 +145,8 @@ public:
 
 private:
     std::string ValueToString(int deep=0, bool add_tabs=true) const;
-    template<typename T> std::string UnaryContainerToString(const T& val, int deep) const;
-    template<typename T> std::string BinaryContainerToString(const T& val, int deep) const;
-    std::string ListToString(const Value::List& val, int deep) const;
-    std::string SetToString(const Value::Set& val, int deep) const;
-    std::string ZSetToString(const Value::ZSet& val, int deep) const;
-    std::string HashToString(const Value::Hash& val, int deep) const;
+    template<typename T>std::string UnaryContainerToString(const T& val, int deep) const;
+    template<typename T>std::string BinaryContainerToString(const T& val, int deep) const;
 
     std::string Tab(int deep) const;
 
