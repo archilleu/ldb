@@ -11,7 +11,6 @@
 #include <memory>
 #include <assert.h>
 #include <functional>
-#include <iostream>
 //-----------------------------------------------------------------------------
 namespace db
 {
@@ -131,7 +130,7 @@ public:
     Hash& GetHash() { assert(HASH); return *std::static_pointer_cast<Hash>(obj_); }
 
     //normal method
-    short type() const { return type_; }
+    uint8_t type() const { return type_; }
 
     const std::shared_ptr<void>& obj() const { return obj_; }
     std::shared_ptr<void>& obj() { return obj_; }
@@ -159,7 +158,7 @@ private:
     std::string AddTab(int deep) const;
 
 private:
-    short type_;
+    uint8_t type_;
     std::shared_ptr<void> obj_;
 };
 using ValuePtr = std::shared_ptr<Value>;
