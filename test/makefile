@@ -38,11 +38,14 @@ ldb.o : ../ldb.cc
 dump.o : ../dump.cc
 	$(CXX) $(CXX_FLAGS) -c ../dump.cc
 
+undump.o : ../undump.cc
+	$(CXX) $(CXX_FLAGS) -c ../undump.cc
+
 crc64.o : ../crc64.c
 	$(CXX)  -c ../crc64.c
 
-$(TARGET_NAME):$(OBJS) value.o ldb.o dump.o crc64.o
-	$(CXX) $(OBJS) value.o ldb.o dump.o crc64.o -o $(TARGET_NAME) $(SHARE_LIP_PATH) $(SHARE_LIB) $(PUBLIC_SHARE_LIB)
+$(TARGET_NAME):$(OBJS) value.o ldb.o dump.o undump.o crc64.o
+	$(CXX) $(OBJS) value.o ldb.o dump.o undump.o crc64.o -o $(TARGET_NAME) $(SHARE_LIP_PATH) $(SHARE_LIB) $(PUBLIC_SHARE_LIB)
 
 .PHONY:clean
 clean:

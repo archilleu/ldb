@@ -3,6 +3,7 @@
 #include "test_base.h"
 #include "test_value.h"
 #include "test_ldb.h"
+#include "test_dump.h"
 #include <iostream>
 //---------------------------------------------------------------------------
 using namespace db;
@@ -13,7 +14,8 @@ TestMain::TestMain()
 #define TEST_ADD(TypeName)   test_obj_list_[#TypeName]=std::shared_ptr<TestBase>(dynamic_cast<TestBase*>(new TypeName))
 
     //TEST_ADD(TestValue);
-    TEST_ADD(TestLdb);
+    //TEST_ADD(TestLdb);
+    TEST_ADD(TestDump);
 
 #undef TEST_ADD
 }
