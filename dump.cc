@@ -5,6 +5,7 @@
 #include <memory>
 #include <cstdio>
 #include <cstring>
+#include <iostream>
 //-----------------------------------------------------------------------------
 namespace db
 {
@@ -78,21 +79,17 @@ bool Dump::ValueToBin(const Value& val)
 {
     switch(val.type())
     {
-        case Value::INVALID:
-            return InvalidToBin(val);
-
-        case Value::BOOLEAN:
-            return BooleanToBin(val);
-
-        case Value::INT:
-        case Value::UINT:
-        case Value::FLOAT:
-        case Value::BINARY:
-        case Value::STRING:
-        case Value::LIST:
-        case Value::SET:
-        case Value::ZSET:
-        case Value::HASH:
+        case Value::INVALID:    return InvalidToBin(val);
+        case Value::BOOLEAN:    return BooleanToBin(val);
+        case Value::INT:        return IntToBin(val);
+        case Value::UINT:       return UIntToBin(val);
+        case Value::FLOAT:      return FloatToBin(val);
+        case Value::BINARY:     return BinaryToBin(val);
+        case Value::STRING:     return StringToBin(val);
+        case Value::LIST:       return ListToBin(val);
+        case Value::SET:        return SetToBin(val);
+        case Value::ZSET:       return ZSetToBin(val);
+        case Value::HASH:       return HashToBin(val);
 
         default:
             assert(0);
@@ -101,9 +98,12 @@ bool Dump::ValueToBin(const Value& val)
     return false;
 }
 //-----------------------------------------------------------------------------
-bool Dump::InvalidToBin(const Value& val)
+bool Dump::InvalidToBin(const Value& /*val*/)
 {
-    (void)val;
+    /*
+     * |Value::INVALID(uint8_t)|value|
+     */
+
     if(false == WriteType(Value::INVALID))
         return false;
 
@@ -116,10 +116,15 @@ bool Dump::InvalidToBin(const Value& val)
 //-----------------------------------------------------------------------------
 bool Dump::BooleanToBin(const Value& val)
 {
+    /*
+     * |Value::TYPE(uint8_t)|value|
+     */
+
     if(false == WriteType(Value::BOOLEAN))
         return false;
 
-    if(false == Write(&val, sizeof(bool)))
+    bool v = val.GetBoolean();
+    if(false == Write(&v, sizeof(bool)))
         return false;
 
     return true;
@@ -127,50 +132,189 @@ bool Dump::BooleanToBin(const Value& val)
 //-----------------------------------------------------------------------------
 bool Dump::IntToBin(const Value& val)
 {
-    (void)val;
-    return 1;
+    /*
+     * |Value::TYPE(uint8_t)|value|
+     */
+
+    if(false == WriteType(Value::INT))
+        return false;
+
+    int64_t v = val.GetInt();
+    if(false == Write(&v, sizeof(int64_t)))
+        return false;
+
+    return true;
 }
 //-----------------------------------------------------------------------------
 bool Dump::UIntToBin(const Value& val)
 {
-    (void)val;
-    return 1;
+    /*
+     * |Value::TYPE(uint8_t)|value|
+     */
+
+    if(false == WriteType(Value::UINT))
+        return false;
+
+    uint64_t v = val.GetUInt();
+    if(false == Write(&v, sizeof(uint64_t)))
+        return false;
+
+    return true;
 }
 //-----------------------------------------------------------------------------
 bool Dump::FloatToBin(const Value& val)
 {
-    (void)val;
-    return 1;
+    /*
+     * |Value::TYPE(uint8_t)|value|
+     */
+
+    if(false == WriteType(Value::FLOAT))
+        return false;
+
+    double v = val.GetFloat();
+    if(false == Write(&v, sizeof(double)))
+        return false;
+
+    return true;
+}
+//-----------------------------------------------------------------------------
+bool Dump::BinaryToBin(const Value& val)
+{
+    /*
+     * |Value::TYPE(uint8_t)|size(uint32_t)|value|
+     */
+
+    if(false == WriteType(Value::BINARY))
+        return false;
+    
+    const auto& v = val.GetBinary();
+
+    //write size
+    if(false == WriteSize(static_cast<uint32_t>(v.size())))
+        return false;
+
+    //write value
+    if(false == Write(v.data(), v.size()))
+        return false;
+
+    return true;
 }
 //-----------------------------------------------------------------------------
 bool Dump::StringToBin(const Value& val)
 {
-    (void)val;
-    return 1;
+    /*
+     * |Value::TYPE(uint8_t)|size(uint32_t)|value|
+     */
+
+    if(false == WriteType(Value::STRING))
+        return false;
+
+    const auto& v = val.GetString();
+
+    //write size
+    if(false == WriteSize(static_cast<uint32_t>(v.size())))
+        return false;
+
+    //write value
+    if(false == Write(v.c_str(), v.length()))
+        return false;
+
+    if(false == Write(v.c_str(), v.length()))
+        return false;
+
+    return true;
 }
 //-----------------------------------------------------------------------------
 bool Dump::ListToBin(const Value& val)
 {
-    (void)val;
-    return 1;
+    /*
+     * |Value::TYPE(uint8_t)|size(uint32_t)|Value|
+     */
+
+    if(false == WriteType(Value::LIST))
+        return false;
+
+    const auto& list  = val.GetList();
+    if(false == WriteSize(static_cast<uint32_t>(list.size())))
+        return false;
+
+    for(const auto& v : list)
+        ValueToBin(v);
+
+    return true;
 }
 //-----------------------------------------------------------------------------
 bool Dump::SetToBin(const Value& val)
 {
-    (void)val;
-    return 1;
+    /*
+     * |Value::TYPE(uint8_t)|size(uint32_t)|Value|
+     */
+
+    if(false == WriteType(Value::SET))
+        return false;
+
+    const auto& set = val.GetSet();
+    if(false == WriteSize(static_cast<uint32_t>(set.size())))
+        return false;
+
+    for(const auto& v : set)
+        ValueToBin(v);
+
+    return true;
 }
 //-----------------------------------------------------------------------------
 bool Dump::ZSetToBin(const Value& val)
 {
-    (void)val;
-    return 1;
+    /*
+     * |Value::ZSET(uint8_t)|size(uint32_t)|double|Value|
+     */
+
+    if(false == WriteType(Value::ZSET))
+        return false;
+
+    const auto& zset = val.GetZSet();
+    if(false == WriteSize(static_cast<uint32_t>(zset.size())))
+        return false;
+
+    for(const auto& v : zset)
+    {
+        //write score value
+        if(false == WriteScore(v.first))
+            return false;
+
+        //write value;
+        if(false == ValueToBin(v.second))
+            return false;
+    }
+    
+    return true;;
 }
 //-----------------------------------------------------------------------------
 bool Dump::HashToBin(const Value& val)
 {
-    (void)val;
-    return 1;
+    /*
+     * |Value::HASH(uint8_t)|size(uint32_t)|String|Value|
+     */
+
+    if(false == WriteType(Value::HASH))
+        return false;
+
+    const auto& hash = val.GetHash();
+    if(false == WriteSize(static_cast<uint32_t>(hash.size())))
+        return false;
+
+    for(const auto& v : hash)
+    {
+        //write key
+        if(false == WriteKey(v.first))
+            return false;
+
+        //write value;
+        if(false == ValueToBin(v.second))
+            return false;
+    }
+    
+    return true;;
 }
 //-----------------------------------------------------------------------------
 bool Dump::Write(const void* buf, size_t len)
@@ -195,6 +339,21 @@ bool Dump::Write(const void* buf, size_t len)
 bool Dump::WriteType(uint8_t type)
 {
     return Write(&type, sizeof(uint8_t));
+}
+//-----------------------------------------------------------------------------
+bool Dump::WriteSize(uint32_t len)
+{
+    return Write(&len, sizeof(uint32_t));
+}
+//-----------------------------------------------------------------------------
+bool Dump::WriteScore(double score)
+{
+    return Write(&score, sizeof(double));
+}
+//-----------------------------------------------------------------------------
+bool Dump::WriteKey(const std::string& key)
+{
+    return Write(key.data(), key.length());
 }
 //-----------------------------------------------------------------------------
 bool Dump::WriteIdName()

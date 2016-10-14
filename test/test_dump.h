@@ -27,6 +27,8 @@ private:
     bool TestInvaild();
     bool TestBoolean();
     bool TestInt();
+    bool TestList();
+    bool TestZSet();
 };
 
 }

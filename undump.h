@@ -32,13 +32,14 @@ public:
 
 private:
     //bin to value
-    bool BinToValue(); 
+    bool BinToValue(Value* val); 
 
     bool BinToInvalid(Value* val);
     bool BinToBoolean(Value* val);
     bool BinToInt(Value* val);
     bool BinToUInt(Value* val);
     bool BinToFloat(Value* val);
+    bool BinToBinary(Value* val);
     bool BinToString(Value* val);
     bool BinToList(Value* val);
     bool BinToSet(Value* val);
@@ -47,6 +48,9 @@ private:
 
     bool Read(void* buf, size_t len);
     bool ReadType(uint8_t* type);
+    bool ReadSize(uint32_t* size);
+    bool ReadScore(double* score);
+    bool ReadKey(std::string* key);
     bool ReadIdName(char id_name[3]);
     bool ReadVersion(char version[4]);
     bool ReadEOF(uint8_t* eof);

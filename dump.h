@@ -48,6 +48,7 @@ private:
     bool IntToBin(const Value& val);
     bool UIntToBin(const Value& val);
     bool FloatToBin(const Value& val);
+    bool BinaryToBin(const Value& val);
     bool StringToBin(const Value& val);
     bool ListToBin(const Value& val);
     bool SetToBin(const Value& val);
@@ -56,6 +57,9 @@ private:
 
     bool Write(const void* buf, size_t len);
     bool WriteType(uint8_t type);
+    bool WriteSize(uint32_t len);
+    bool WriteScore(double score);
+    bool WriteKey(const std::string& key);
     bool WriteIdName();
     bool WriteVersion();
     bool WriteEOF();

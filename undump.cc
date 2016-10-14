@@ -42,7 +42,7 @@ bool UnDump::FromBin(Memory&& bin)
     if(0 != memcmp(id_name_, kIDNAME, sizeof(kIDNAME)))     return false;
     if(0 != memcmp(version_, kVERSION, sizeof(kVERSION)))   return false;
 
-    if(false == BinToValue())
+    if(false == BinToValue(&val_))
         return false;
 
     uint64_t cksum;
@@ -64,7 +64,7 @@ bool UnDump::FromFile(std::string&& name)
 
     if(false == ReadIdName(id_name_))   goto ERROR;
     if(false == ReadVersion(version_))  goto ERROR;
-    if(false == BinToValue())           goto ERROR;
+    if(false == BinToValue(&val_))      goto ERROR;
     if(false == ReadChecksum(&cksum_))  goto ERROR;
 
     file_.reset();
@@ -75,36 +75,36 @@ ERROR:
     return false;
 }
 //-----------------------------------------------------------------------------
-bool UnDump::BinToValue()
+bool UnDump::BinToValue(Value* val)
 {
     uint8_t type = Value::INVALID;
-    while(kEOF != type)
+    if(false == ReadType(&type))
+        return false;
+
+    switch(type)
     {
-        if(false == ReadType(&type))
-            return false;
+        case Value::INVALID:
+            return BinToInvalid(val);
 
-        switch(type)
-        {
-            case Value::INVALID:
-                return BinToInvalid(&val_);
+        case Value::BOOLEAN:
+            return BinToBoolean(val);
 
-            case Value::BOOLEAN:
-                return BinToBoolean(&val_);
+        case Value::INT:
+        case Value::UINT:
+        case Value::FLOAT:
+        case Value::BINARY:
+        case Value::STRING:
+        case Value::LIST:
+            return BinToList(val);
 
-            case Value::INT:
-            case Value::UINT:
-            case Value::FLOAT:
-            case Value::BINARY:
-            case Value::STRING:
-            case Value::LIST:
-            case Value::SET:
-            case Value::ZSET:
-            case Value::HASH:
+        case Value::SET:
+        case Value::ZSET:
+            return BinToZSet(val);
 
-            default:
-                assert(0);
-        }
+        case Value::HASH:
 
+        default:
+            assert(0);
     }
 
     return true;
@@ -112,6 +112,10 @@ bool UnDump::BinToValue()
 //-----------------------------------------------------------------------------
 bool UnDump::BinToInvalid(Value* val)
 {
+    /*
+     * |Value::TYPE(uint8_t)|value|
+     */
+
     static uint8_t invalid = 0;
     if(false == Read(&invalid, sizeof(invalid)))
         return false;
@@ -122,11 +126,200 @@ bool UnDump::BinToInvalid(Value* val)
 //-----------------------------------------------------------------------------
 bool UnDump::BinToBoolean(Value* val)
 {
-    bool b;
-    if(false == Read(&b, sizeof(bool)))
+    /*
+     * |Value::TYPE(uint8_t)|value|
+     */
+
+    bool v;
+    if(false == Read(&v, sizeof(bool)))
         return false;
 
-    *val = Value(b);
+    *val = Value(v);
+    return true;
+}
+//-----------------------------------------------------------------------------
+bool UnDump::BinToInt(Value* val)
+{
+    /*
+     * |Value::TYPE(uint8_t)|value|
+     */
+
+    int64_t v;
+    if(false == Read(&v, sizeof(int64_t)))
+        return false;
+
+    *val = Value(v);
+    return true;
+}
+//-----------------------------------------------------------------------------
+bool UnDump::BinToUInt(Value* val)
+{
+    /*
+     * |Value::TYPE(uint8_t)|value|
+     */
+
+    uint64_t v;
+    if(false == Read(&v, sizeof(uint64_t)))
+        return false;
+
+    *val = Value(v);
+    return true;
+}
+//-----------------------------------------------------------------------------
+bool UnDump::BinToFloat(Value* val)
+{
+    /*
+     * |Value::TYPE(uint8_t)|value|
+     */
+
+    double v;
+    if(false == Read(&v, sizeof(double)))
+        return false;
+
+    *val = Value(v);
+    return true;
+}
+//-----------------------------------------------------------------------------
+bool UnDump::BinToBinary(Value* val)
+{
+    /*
+     * |Value::TYPE(uint8_t)|size(uint32_t)|value|
+     */
+
+    //read size
+    uint32_t size;
+    if(false == ReadSize(&size))
+        return false;
+
+    //read val
+    Value::Binary bin(size);
+    if(false == Read(bin.data(), size))
+        return false;
+    
+    *val = Value(std::move(bin));
+    return true;
+}
+//-----------------------------------------------------------------------------
+bool UnDump::BinToString(Value* val)
+{
+    /*
+     * |Value::TYPE(uint8_t)|size(uint32_t)|value|
+     */
+
+    Value::String str;
+    if(false == ReadKey(&str))
+        return false;
+    
+    *val = Value(std::move(str));
+    return true;
+}
+//-----------------------------------------------------------------------------
+bool UnDump::BinToList(Value* val)
+{
+    /*
+     * |Value::TYPE(uint8_t)|size(uint32_t)|value|
+     */
+
+    //read size
+    uint32_t size;
+    if(false == ReadSize(&size))
+        return false;
+
+    //read value
+    Value::List list;
+    for(uint32_t i=0; i<size; i++)
+    {
+        Value v;
+        if(false == BinToValue(&v))
+            return false;
+
+        list.push_back(std::move(v));
+    }
+
+    *val = Value(std::move(list));
+    return true;
+}
+//-----------------------------------------------------------------------------
+bool UnDump::BinToSet(Value* val)
+{
+    /*
+     * |Value::TYPE(uint8_t)|size(uint32_t)|value|
+     */
+
+    //read size
+    uint32_t size;
+    if(false == ReadSize(&size))
+        return false;
+
+    //read value
+    Value::Set set;
+    for(uint32_t i=0; i<size; i++)
+    {
+        Value v;
+        if(false == BinToValue(&v))
+            return false;
+
+        set.insert(std::move(v));
+    }
+
+    *val = Value(std::move(set));
+    return true;
+}
+//-----------------------------------------------------------------------------
+bool UnDump::BinToZSet(Value* val)
+{
+    //read size
+
+    uint32_t size;
+    if(false == ReadSize(&size))
+        return false;
+
+    //read values
+    Value::ZSet zset;
+    for(uint32_t i=0; i<size; i++)
+    {
+        //read score
+        double score;
+        if(false == ReadScore(&score))
+            return false;
+
+        //read value
+        Value v;
+        if(false == BinToValue(&v))
+            return false;
+
+        zset.emplace(score, std::move(v));
+    }
+
+    *val = Value(std::move(zset));
+    return true;
+}
+//-----------------------------------------------------------------------------
+bool UnDump::BinToHash(Value* val)
+{
+    //read size
+    uint32_t size;
+    if(false == ReadSize(&size))
+        return false;
+
+    //read values
+    Value::Hash hash;
+    for(uint32_t i=0; i<size; i++)
+    {
+        //read key 
+        std::string key;
+        if(false == ReadKey(&key))
+            return false;
+
+        //read value
+        Value v;
+        if(false == BinToValue(&v))
+            return false;
+
+        hash.emplace(std::move(key), std::move(v));
+    }
+
+    *val = Value(std::move(hash));
     return true;
 }
 //-----------------------------------------------------------------------------
@@ -152,6 +345,37 @@ bool UnDump::Read(void* buf, size_t len)
 bool UnDump::ReadType(uint8_t* type)
 {
     if(false == Read(type, sizeof(uint8_t)))
+        return false;
+
+    return true;
+}
+//-----------------------------------------------------------------------------
+bool UnDump::ReadSize(uint32_t* size)
+{
+    if(false == Read(size, sizeof(uint32_t)))
+        return false;
+
+    return true;
+}
+//-----------------------------------------------------------------------------
+bool UnDump::ReadScore(double* score)
+{
+    if(false == Read(&score, sizeof(double)))
+        return false;
+
+    return true;
+}
+//-----------------------------------------------------------------------------
+bool UnDump::ReadKey(std::string* key)
+{
+    //read size
+    uint32_t size;
+    if(false == ReadSize(&size))
+        return false;
+
+    //read str
+    key->resize(size);
+    if(false == Read(const_cast<char*>(key->data()), size))
         return false;
 
     return true;
