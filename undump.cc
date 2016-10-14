@@ -83,25 +83,17 @@ bool UnDump::BinToValue(Value* val)
 
     switch(type)
     {
-        case Value::INVALID:
-            return BinToInvalid(val);
-
-        case Value::BOOLEAN:
-            return BinToBoolean(val);
-
-        case Value::INT:
-        case Value::UINT:
-        case Value::FLOAT:
-        case Value::BINARY:
-        case Value::STRING:
-        case Value::LIST:
-            return BinToList(val);
-
-        case Value::SET:
-        case Value::ZSET:
-            return BinToZSet(val);
-
-        case Value::HASH:
+        case Value::INVALID:    return BinToInvalid(val);
+        case Value::BOOLEAN:    return BinToBoolean(val);
+        case Value::INT:        return BinToInt(val);
+        case Value::UINT:       return BinToUInt(val);
+        case Value::FLOAT:      return BinToFloat(val);
+        case Value::BINARY:     return BinToBinary(val);
+        case Value::STRING:     return BinToString(val);
+        case Value::LIST:       return BinToList(val);
+        case Value::SET:        return BinToSet(val);
+        case Value::ZSET:       return BinToZSet(val);
+        case Value::HASH:       return BinToHash(val);
 
         default:
             assert(0);
@@ -360,7 +352,7 @@ bool UnDump::ReadSize(uint32_t* size)
 //-----------------------------------------------------------------------------
 bool UnDump::ReadScore(double* score)
 {
-    if(false == Read(&score, sizeof(double)))
+    if(false == Read(score, sizeof(double)))
         return false;
 
     return true;

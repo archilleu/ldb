@@ -27,8 +27,15 @@ private:
     bool TestInvaild();
     bool TestBoolean();
     bool TestInt();
+    bool TestUInt();
+    bool TestFloat();
+    bool TestBinary();
+    bool TestString();
     bool TestList();
+    bool TestSet();
     bool TestZSet();
+    bool TestHash();
+    bool TestMix();
 };
 
 }

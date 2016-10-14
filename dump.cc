@@ -219,9 +219,6 @@ bool Dump::StringToBin(const Value& val)
     if(false == Write(v.c_str(), v.length()))
         return false;
 
-    if(false == Write(v.c_str(), v.length()))
-        return false;
-
     return true;
 }
 //-----------------------------------------------------------------------------
@@ -353,7 +350,16 @@ bool Dump::WriteScore(double score)
 //-----------------------------------------------------------------------------
 bool Dump::WriteKey(const std::string& key)
 {
-    return Write(key.data(), key.length());
+    //write key len
+    uint32_t size = static_cast<uint32_t>(key.size());
+    if(false == Write(&size, sizeof(uint32_t)))
+        return false;
+
+    //write val
+    if(false == Write(key.data(), key.length()))
+        return false;
+
+    return true;
 }
 //-----------------------------------------------------------------------------
 bool Dump::WriteIdName()
