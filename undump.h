@@ -14,21 +14,31 @@ namespace db
 {
 
 //-----------------------------------------------------------------------------
-class UnDump 
+class Undump 
 {
 public:
     using Memory = std::vector<uint8_t>;
 
-    UnDump()
+    Undump()
     :   cksum_(0),
         enable_cksum_(false)
     {
     }
+
     bool FromBin(const Memory& bin);
     bool FromBin(Memory&& bin);
-    bool FromFile(std::string&& name);
+    bool FromFile(const std::string& name);
 
     const Value& value() { return val_; }
+
+    void set_enable_cksum_(bool enable) { enable_cksum_ = enable; }
+    bool enable_cksum() { return enable_cksum_; }
+
+
+public:
+    const static char kIDNAME[3];   //"LDB"
+    const static char kVERSION[4];  //current bin format version
+    const static uint8_t kEOF;      //end of db bin
 
 private:
     //bin to value
@@ -56,11 +66,6 @@ private:
     bool ReadEOF(uint8_t* eof);
     bool ReadChecksum(uint64_t* cksum);
 
-public:
-    const static char kIDNAME[3];   //"LDB"
-    const static char kVERSION[4];  //current bin format version
-    const static uint8_t kEOF;      //end of db bin
-
 private:
     Value val_;
 
@@ -71,7 +76,6 @@ private:
     bool file_or_bin_; //read from file or memory
     
     Memory bin_;
-    std::string dump_name_;
     std::shared_ptr<FILE> file_;
     size_t pos_;
 };

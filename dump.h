@@ -23,21 +23,22 @@ public:
     :   val_(v),
         cksum_(0),
         enable_cksum_(false),
-        file_or_bin_(false),
-        dump_name_("dump")
+        file_or_bin_(false)
     {
     }
 
     bool ToBin();
-    bool ToFile();
+    bool ToFile(const std::string& path);
 
     const Memory& bin() const { return bin_; }
 
     void set_enable_cksum_(bool enable) { enable_cksum_ = enable; }
     bool enable_cksum() { return enable_cksum_; }
 
-    void set_dump_name(std::string&& name) { dump_name_ = name; }
-    const std::string& dump_name() const { return dump_name_; }
+public:
+    const static char kIDNAME[3];   //"LDB"
+    const static char kVERSION[4];  //current bin format version
+    const static uint8_t kEOF;      //end of db bin
 
 private:
     //val to bin
@@ -65,11 +66,6 @@ private:
     bool WriteEOF();
     bool WriteChecksum();
 
-public:
-    const static char kIDNAME[3];   //"LDB"
-    const static char kVERSION[4];  //current bin format version
-    const static uint8_t kEOF;      //end of db bin
-
 private:
     const Value& val_;
 
@@ -78,7 +74,6 @@ private:
     bool file_or_bin_; //write to file or memory
 
     Memory bin_;
-    std::string dump_name_;
     std::shared_ptr<FILE> file_;
     size_t pos_;
 };

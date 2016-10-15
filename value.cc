@@ -2,6 +2,8 @@
 #include <string.h>
 #include <sstream>
 #include "value.h"
+#include "dump.h"
+#include "undump.h"
 //---------------------------------------------------------------------------
 namespace
 {
@@ -474,49 +476,17 @@ std::string Value::ValueToString(int deep, bool add_tabs) const
 
     switch(type())
     {
-        case INVALID:
-            ss << "nil";
-            break;
-
-        case BOOLEAN:
-            ss << std::boolalpha << GetBoolean() << std::noboolalpha;
-            break;
-
-        case INT:
-            ss << GetInt();
-            break;
-
-        case UINT:
-            ss << GetUInt();
-            break;
-
-        case FLOAT:
-            ss << GetFloat();
-            break;
-
-        case STRING:
-            ss << "\"" << GetString() << "\"";
-            break;
-
-        case BINARY:
-            ss << "x\'" << BinToString(GetBinary().data(), GetBinary().size());
-            break;
-
-        case LIST:
-            ss << UnaryContainerToString(GetList(), deep+1);
-            break;
-
-        case SET:
-            ss << UnaryContainerToString(GetSet(), deep+1);
-            break;
-
-        case ZSET:
-            ss << BinaryContainerToString(GetZSet(), deep+1);
-            break;
-
-        case HASH:
-            ss << BinaryContainerToString(GetHash(), deep+1);
-            break;
+        case INVALID:   ss << "nil"; break;
+        case BOOLEAN:   ss << std::boolalpha << GetBoolean() << std::noboolalpha; break;
+        case INT:       ss << GetInt(); break;
+        case UINT:      ss << GetUInt(); break;
+        case FLOAT:     ss << GetFloat(); break;
+        case STRING:    ss << "\"" << GetString() << "\""; break;
+        case BINARY:    ss << "x\'" << BinToString(GetBinary().data(), GetBinary().size()); break;
+        case LIST:      ss << UnaryContainerToString(GetList(), deep+1); break;
+        case SET:       ss << UnaryContainerToString(GetSet(), deep+1); break;
+        case ZSET:      ss << BinaryContainerToString(GetZSet(), deep+1); break;
+        case HASH:      ss << BinaryContainerToString(GetHash(), deep+1); break;
     }
 
     switch(type())
@@ -535,60 +505,21 @@ std::string Value::UnaryContainerToString(const T& val, int deep) const
 {
     std::stringstream ss;
 
-    for(auto iter : val)
+    for(const auto iter : val)
     {
         switch(iter.type())
         {
-            case INVALID:
-                ss << AddTab(deep);
-                ss << "nil";
-                break;
-
-            case BOOLEAN:
-                ss << AddTab(deep);
-                ss << std::boolalpha << iter.GetBoolean() << std::noboolalpha;
-                break;
-
-            case INT:
-                ss << AddTab(deep);
-                ss << iter.GetInt();
-                break;
-
-            case UINT:
-                ss << AddTab(deep);
-                ss << iter.GetUInt();
-                break;
-
-            case FLOAT:
-                ss << AddTab(deep);
-                ss << iter.GetFloat();
-                break;
-
-            case STRING:
-                ss << AddTab(deep);
-                ss << "\"" << iter.GetString() << "\"";
-                break;
-
-            case BINARY:
-                ss << AddTab(deep);
-                ss << "x\'" << BinToString(iter.GetBinary().data(), iter.GetBinary().size());
-                break;
-
-            case LIST:
-                ss << iter.ValueToString(deep);
-                break;
-
-            case SET:
-                ss << iter.ValueToString(deep);
-                break;
-
-            case ZSET:
-                ss << iter.ValueToString(deep);
-                break;
-
-            case HASH:
-                ss << iter.ValueToString(deep);
-                break;
+            case INVALID:   ss << AddTab(deep); ss << "nil"; break;
+            case BOOLEAN:   ss << AddTab(deep); ss << std::boolalpha << iter.GetBoolean() << std::noboolalpha; break;
+            case INT:       ss << AddTab(deep); ss << iter.GetInt(); break;
+            case UINT:      ss << AddTab(deep); ss << iter.GetUInt(); break;
+            case FLOAT:     ss << AddTab(deep); ss << iter.GetFloat(); break;
+            case STRING:    ss << AddTab(deep); ss << "\"" << iter.GetString() << "\""; break;
+            case BINARY:    ss << AddTab(deep); ss << "x\'" << BinToString(iter.GetBinary().data(), iter.GetBinary().size()); break;
+            case LIST:      ss << iter.ValueToString(deep); break;
+            case SET:       ss << iter.ValueToString(deep); break;
+            case ZSET:      ss << iter.ValueToString(deep); break;
+            case HASH:      ss << iter.ValueToString(deep); break;
         }
 
         ss << "," << std::endl;
@@ -616,49 +547,17 @@ std::string Value::BinaryContainerToString(const T& val, int deep) const
 
         switch(iter.second.type())
         {
-            case INVALID:
-                ss << "nil";
-                break;
-
-            case BOOLEAN:
-                ss << std::boolalpha << iter.second.GetBoolean() << std::noboolalpha;
-                break;
-
-            case INT:
-                ss << iter.second.GetInt();
-                break;
-
-            case UINT:
-                ss << iter.second.GetUInt();
-                break;
-
-            case FLOAT:
-                ss << iter.second.GetFloat();
-                break;
-
-            case STRING:
-                ss << "\"" << iter.second.GetString() << "\"";
-                break;
-
-            case BINARY:
-                ss << "x\'" << BinToString(iter.second.GetBinary().data(), iter.second.GetBinary().size());
-                break;
-
-            case LIST:
-                ss << iter.second.ValueToString(deep, false);
-                break;
-
-            case SET:
-                ss << iter.second.ValueToString(deep, false);
-                break;
-
-            case ZSET:
-                ss << iter.second.ValueToString(deep, false);
-                break;
-
-            case HASH:
-                ss << iter.second.ValueToString(deep, false);
-                break;
+            case INVALID:ss << "nil"; break;
+            case BOOLEAN:ss << std::boolalpha << iter.second.GetBoolean() << std::noboolalpha; break;
+            case INT:ss << iter.second.GetInt(); break;
+            case UINT:ss << iter.second.GetUInt(); break;
+            case FLOAT:ss << iter.second.GetFloat(); break;
+            case STRING:ss << "\"" << iter.second.GetString() << "\""; break;
+            case BINARY:ss << "x\'" << BinToString(iter.second.GetBinary().data(), iter.second.GetBinary().size()); break;
+            case LIST:ss << iter.second.ValueToString(deep, false); break;
+            case SET:ss << iter.second.ValueToString(deep, false); break;
+            case ZSET:ss << iter.second.ValueToString(deep, false); break;
+            case HASH:ss << iter.second.ValueToString(deep, false); break;
         }
 
         ss << "," << std::endl;
@@ -689,6 +588,25 @@ std::ostream& operator<<(std::ostream& out, const Value& val)
     out << str;
 
     return out;
+}
+//---------------------------------------------------------------------------
+bool Value::SaveFile(const std::string& path)
+{
+    Dump d(*this);
+    if(false == d.ToFile(path))
+        return false;
+
+    return true;
+}
+//---------------------------------------------------------------------------
+bool Value::LoadFile(const std::string& path)
+{
+    Undump ud;
+    if(false == ud.FromFile(path))
+        return false;
+
+    *this = std::move(ud.value());
+    return true;
 }
 //---------------------------------------------------------------------------
 }//namespace db

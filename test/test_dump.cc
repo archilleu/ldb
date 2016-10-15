@@ -11,18 +11,19 @@ using namespace test;
 //---------------------------------------------------------------------------
 bool TestDump::DoTest()
 {
-    //if(false == TestInvaild())  return false;
-    //if(false == TestBoolean())  return false;
-    //if(false == TestInt())  return false;
-    //if(false == TestUInt())  return false;
-    //if(false == TestFloat())  return false;
-    //if(false == TestBinary())  return false;
-    //if(false == TestString())  return false;
-    //if(false == TestList())  return false;
-    //if(false == TestSet())  return false;
-    //if(false == TestZSet())  return false;
-    //if(false == TestHash())  return false;
+    if(false == TestInvaild())  return false;
+    if(false == TestBoolean())  return false;
+    if(false == TestInt())  return false;
+    if(false == TestUInt())  return false;
+    if(false == TestFloat())  return false;
+    if(false == TestBinary())  return false;
+    if(false == TestString())  return false;
+    if(false == TestList())  return false;
+    if(false == TestSet())  return false;
+    if(false == TestZSet())  return false;
+    if(false == TestHash())  return false;
     if(false == TestMix())  return false;
+    if(false == TestCompSTL()) return false;
 
     return true;
 }
@@ -39,7 +40,7 @@ bool TestDump::TestInvaild()
         for_each(bin.begin(), bin.end(), [](unsigned char c){ printf("%x,", c); });
     std::cout << std::endl;
 
-    UnDump ud;
+    Undump ud;
     MY_ASSERT(ud.FromBin(std::move(bin)));
     std::cout << ud.value() << std::endl;
 
@@ -58,7 +59,7 @@ bool TestDump::TestBoolean()
         for_each(bin.begin(), bin.end(), [](unsigned char c){ printf("%x,", c); });
     std::cout << std::endl;
 
-    UnDump ud;
+    Undump ud;
     MY_ASSERT(ud.FromBin(std::move(bin)));
     std::cout << ud.value() << std::endl;
 
@@ -77,7 +78,7 @@ bool TestDump::TestInt()
         for_each(bin.begin(), bin.end(), [](unsigned char c){ printf("%x,", c); });
     std::cout << std::endl;
 
-    UnDump ud;
+    Undump ud;
     MY_ASSERT(ud.FromBin(std::move(bin)));
     std::cout << ud.value() << std::endl;
 
@@ -96,7 +97,7 @@ bool TestDump::TestUInt()
         for_each(bin.begin(), bin.end(), [](unsigned char c){ printf("%x,", c); });
     std::cout << std::endl;
 
-    UnDump ud;
+    Undump ud;
     MY_ASSERT(ud.FromBin(std::move(bin)));
     std::cout << ud.value() << std::endl;
 
@@ -115,7 +116,7 @@ bool TestDump::TestFloat()
         for_each(bin.begin(), bin.end(), [](unsigned char c){ printf("%x,", c); });
     std::cout << std::endl;
 
-    UnDump ud;
+    Undump ud;
     MY_ASSERT(ud.FromBin(std::move(bin)));
     std::cout << ud.value() << std::endl;
 
@@ -135,7 +136,7 @@ bool TestDump::TestBinary()
         for_each(bin.begin(), bin.end(), [](unsigned char c){ printf("%x,", c); });
     std::cout << std::endl;
 
-    UnDump ud;
+    Undump ud;
     MY_ASSERT(ud.FromBin(std::move(bin)));
     std::cout << ud.value() << std::endl;
 
@@ -155,7 +156,7 @@ bool TestDump::TestString()
         for_each(bin.begin(), bin.end(), [](unsigned char c){ printf("%x,", c); });
     std::cout << std::endl;
 
-    UnDump ud;
+    Undump ud;
     MY_ASSERT(ud.FromBin(std::move(bin)));
     std::cout << ud.value() << std::endl;
 
@@ -179,7 +180,7 @@ bool TestDump::TestList()
     std::cout << std::endl;
     std::cout << val << std::endl;
 
-    UnDump ud;
+    Undump ud;
     MY_ASSERT(ud.FromBin(std::move(bin)));
     std::cout << ud.value() << std::endl;
 
@@ -202,7 +203,7 @@ bool TestDump::TestSet()
     std::cout << std::endl;
     std::cout << val << std::endl;
 
-    UnDump ud;
+    Undump ud;
     MY_ASSERT(ud.FromBin(std::move(bin)));
     std::cout << ud.value() << std::endl;
 
@@ -225,7 +226,7 @@ bool TestDump::TestZSet()
         for_each(bin.begin(), bin.end(), [](unsigned char c){ printf("%x,", c); });
     std::cout << std::endl;
 
-    UnDump ud;
+    Undump ud;
     MY_ASSERT(ud.FromBin(std::move(bin)));
     std::cout << ud.value() << std::endl;
 
@@ -249,7 +250,7 @@ bool TestDump::TestHash()
     std::cout << std::endl;
     std::cout << val << std::endl;
 
-    UnDump ud;
+    Undump ud;
     MY_ASSERT(ud.FromBin(std::move(bin)));
     std::cout << ud.value() << std::endl;
 
@@ -303,10 +304,10 @@ bool TestDump::TestMix()
     Value::ZSet zs1(zset);
     Value::Hash h1(hash);
 
-    //l1.push_back(Value(list));
+    l1.push_back(Value(list));
     l1.push_back(Value(set));
-    //l1.push_back(Value(zset));
-    //l1.push_back(Value(hash));
+    l1.push_back(Value(zset));
+    l1.push_back(Value(hash));
 
     s1.insert(Value(list));
     s1.insert(Value(set));
@@ -325,9 +326,9 @@ bool TestDump::TestMix()
 
     Value o(Value::TYPE::HASH);
     o["list"] = Value(l1);
-    //o["set"] = Value(s1);
-    //o["zset"] = Value(zs1);
-    //o["hash"] = Value(h1);
+    o["set"] = Value(s1);
+    o["zset"] = Value(zs1);
+    o["hash"] = Value(h1);
 
     std::cout << "================" << std::endl;
         std::cout << o << std::endl;
@@ -340,54 +341,168 @@ bool TestDump::TestMix()
         for_each(bin.begin(), bin.end(), [](unsigned char c){ printf("%x,", c); });
     std::cout << std::endl;
 
-    UnDump ud;
+    Undump ud;
     MY_ASSERT(ud.FromBin(std::move(bin)));
     std::cout << ud.value() << std::endl;
 
-    /*
-    //hash[]
-    MY_ASSERT(o["hash"]["key0"] == Value());
-    MY_ASSERT(o["hash"]["key1"] == Value(true));
-    MY_ASSERT(o["hash"]["key2"] == Value(true));
-    MY_ASSERT(o["hash"]["key3"] == Value(false));
-    MY_ASSERT(o["hash"]["key4"] == Value(int64_t(LONG_LONG_MAX)));
-    MY_ASSERT(o["hash"]["key5"] == Value(uint64_t(ULONG_LONG_MAX)));
-    MY_ASSERT(o["hash"]["key6"] == Value(DBL_MAX));
-    MY_ASSERT(o["hash"]["key7"] == Value("string"));
-    o["hash"]["key7"] = Value("new string");
-    std::cout << o["hash"]["key7"] << std::endl;
+    return true;
+}
+//---------------------------------------------------------------------------
+static std::string NumToStr(int64_t num)
+{
+    char buf[32];
+    snprintf(buf, sizeof(buf), "%zu",  num);
 
-    //zset[]
-    Value::List zl1 = o["zset"][1];
-    std::cout << "nil:" << Value(zl1) << std::endl;
+    return buf;
+}
+//---------------------------------------------------------------------------
+bool TestDump::TestCompSTL()
+{
+    int64_t size = 1024*10;
+    std::list<int64_t> stl_list;
+    std::unordered_set<std::string> stl_set;
+    std::multimap<double, std::string> stl_zset;
+    std::unordered_map<std::string, int64_t> stl_hash;
 
-    Value::List zl2 = o["zset"][2];
-    Value zlv1(zl2);
-    std::cout << "true:" << zlv1 << std::endl;
-    zl2.begin()->SetBoolean(false);
-    Value zlv2(zl2);
-    std::cout << "true:" << zlv1 << std::endl;
-    std::cout << "false:" << zlv2 << std::endl;
+    //stl_list
+    for(int64_t i=0; i<size; i++)
+        stl_list.push_back(i);
 
-    Value::List zl3 = o["zset"][3];
-    std::cout << "true:" << Value(zl3) << std::endl;
+    //stl_set
+    for(int64_t i=0; i<size; i++)
+        stl_set.insert(NumToStr(i));
 
-    Value::List zl4 = o["zset"][4];
-    std::cout << "false:" << Value(zl4) << std::endl;
+    //stl_zset
+    for(int64_t i=0; i<size; i++)
+        stl_zset.emplace(i, NumToStr(i));
 
-    Value::List zl5 = o["zset"][5];
-    std::cout << "LL:" << Value(zl5) << std::endl;
+    //stl_hash
+    for(int64_t i=0; i<size; i++)
+        stl_hash.emplace(NumToStr(i), i);
 
-    Value::List zl6 = o["zset"][6];
-    std::cout << "ULL:" << Value(zl6) << std::endl;
+    MY_ASSERT(size == static_cast<int64_t>(stl_list.size()));
+    MY_ASSERT(size == static_cast<int64_t>(stl_set.size()));
+    MY_ASSERT(size == static_cast<int64_t>(stl_zset.size()));
+    MY_ASSERT(size == static_cast<int64_t>(stl_hash.size()));
 
-    Value::List zl7 = o["zset"][7];
-    std::cout << "FM:" << Value(zl7) << std::endl;
 
-    Value::List zl8 = o["zset"][8];
-    std::cout << "string:" << Value(zl8) << std::endl;
+    Value::List list;
+    Value::Set set;
+    Value::ZSet zset;
+    Value::Hash hash;
 
-    */
+    //list
+    for(int64_t i=0; i<size; i++)
+        list.push_back(Value(i));
+
+    //set
+    for(int64_t i=0; i<size; i++)
+        set.insert(Value(NumToStr(i)));
+
+    //zset
+    for(int64_t i=0; i<size; i++)
+        zset.emplace(i, Value(NumToStr(i)));
+
+    //hash
+    for(int64_t i=0; i<size; i++)
+        hash.emplace(NumToStr(i), Value(i));
+
+    MY_ASSERT(size == static_cast<int64_t>(list.size()));
+    MY_ASSERT(size == static_cast<int64_t>(set.size()));
+    MY_ASSERT(size == static_cast<int64_t>(zset.size()));
+    MY_ASSERT(size == static_cast<int64_t>(hash.size()));
+
+    Value vl(list);
+    Value vs(set);
+    Value vzs(zset);
+    Value vh(hash);
+
+    //comp list
+    {
+    auto v2 = list.begin();
+    for(auto v1=stl_list.begin(); v1!=stl_list.end(); ++v1)
+    {
+        assert(*v1 == v2->GetInt());
+        ++v2;
+    }
+    }
+
+    //comp set
+    {
+    for(auto v1=stl_set.begin(); v1!=stl_set.end(); ++v1)
+    {
+        auto iter = set.find(Value(*v1));
+        if(set.end() == iter)
+            assert(0);
+    }
+
+    //comp zset
+    for(auto v1=stl_zset.begin(); v1!=stl_zset.end(); ++v1)
+    {
+        auto iter = zset.find(v1->first);
+        if(zset.end() == iter)
+            assert(0);
+    }
+
+    //comp hash 
+    for(auto v1=stl_hash.begin(); v1!=stl_hash.end(); ++v1)
+    {
+        auto iter = hash.find(v1->first);
+        if(hash.end() == iter)
+            assert(0);
+    }
+
+    Value mix(Value::HASH);
+    mix["list"] = Value(list);
+    mix["set"] = Value(set);
+    mix["zset"] = Value(zset);
+    mix["hash"] = Value(hash);
+
+    MY_ASSERT(mix.SaveFile("dump.ldb"));
+    Value v2;
+    MY_ASSERT(v2.LoadFile("dump.ldb"));
+
+    auto l1 = v2["list"];
+    auto s1 = v2["set"];
+    auto zs1 = v2["zset"];
+    auto h1 = v2["hash"];
+
+    //comp list
+    {
+    auto v3 = l1.GetList().begin();
+    for(auto v1=stl_list.begin(); v1!=stl_list.end(); ++v1)
+    {
+        assert(*v1 == v3->GetInt());
+        ++v3;
+    }
+    }
+
+    //comp set
+    for(auto v1=stl_set.begin(); v1!=stl_set.end(); ++v1)
+    {
+        auto iter = s1.GetSet().find(Value(*v1));
+        if(s1.GetSet().end() == iter)
+            assert(0);
+    }
+
+    //comp zset
+    for(auto v1=stl_zset.begin(); v1!=stl_zset.end(); ++v1)
+    {
+        auto iter = zs1.GetZSet().find(v1->first);
+        if(zs1.GetZSet().end() == iter)
+            assert(0);
+    }
+
+    //comp hash 
+    for(auto v1=stl_hash.begin(); v1!=stl_hash.end(); ++v1)
+    {
+        auto iter = h1.GetHash().find(v1->first);
+        if(h1.GetHash().end() == iter)
+            assert(0);
+    }
+
+    }
+
     return true;
 }
 //---------------------------------------------------------------------------

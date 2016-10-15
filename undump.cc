@@ -21,16 +21,16 @@ namespace
 
 }//namespace
 //-----------------------------------------------------------------------------
-const char      UnDump::kIDNAME[3]  = {'L','D','B'};
-const char      UnDump::kVERSION[4] = {'0','0','0','1'};
-const uint8_t   UnDump::kEOF        = 0xFF;
+const char      Undump::kIDNAME[3]  = {'L','D','B'};
+const char      Undump::kVERSION[4] = {'0','0','0','1'};
+const uint8_t   Undump::kEOF        = 0xFF;
 //-----------------------------------------------------------------------------
-bool UnDump::FromBin(const Memory& bin)
+bool Undump::FromBin(const Memory& bin)
 {
     return FromBin(Memory(bin));
 }
 //-----------------------------------------------------------------------------
-bool UnDump::FromBin(Memory&& bin)
+bool Undump::FromBin(Memory&& bin)
 {
     //write bin
     file_or_bin_ = false;
@@ -52,7 +52,7 @@ bool UnDump::FromBin(Memory&& bin)
     return true;
 }
 //-----------------------------------------------------------------------------
-bool UnDump::FromFile(std::string&& name)
+bool Undump::FromFile(const std::string& name)
 {
     //write file
     file_or_bin_ = true;
@@ -60,7 +60,6 @@ bool UnDump::FromFile(std::string&& name)
     if(0 == fp)
         return false;
     file_.reset(fp, FileClose);
-    dump_name_ = std::move(name);
 
     if(false == ReadIdName(id_name_))   goto ERROR;
     if(false == ReadVersion(version_))  goto ERROR;
@@ -75,7 +74,7 @@ ERROR:
     return false;
 }
 //-----------------------------------------------------------------------------
-bool UnDump::BinToValue(Value* val)
+bool Undump::BinToValue(Value* val)
 {
     uint8_t type = Value::INVALID;
     if(false == ReadType(&type))
@@ -102,7 +101,7 @@ bool UnDump::BinToValue(Value* val)
     return true;
 }
 //-----------------------------------------------------------------------------
-bool UnDump::BinToInvalid(Value* val)
+bool Undump::BinToInvalid(Value* val)
 {
     /*
      * |Value::TYPE(uint8_t)|value|
@@ -116,7 +115,7 @@ bool UnDump::BinToInvalid(Value* val)
     return true;
 }
 //-----------------------------------------------------------------------------
-bool UnDump::BinToBoolean(Value* val)
+bool Undump::BinToBoolean(Value* val)
 {
     /*
      * |Value::TYPE(uint8_t)|value|
@@ -130,7 +129,7 @@ bool UnDump::BinToBoolean(Value* val)
     return true;
 }
 //-----------------------------------------------------------------------------
-bool UnDump::BinToInt(Value* val)
+bool Undump::BinToInt(Value* val)
 {
     /*
      * |Value::TYPE(uint8_t)|value|
@@ -144,7 +143,7 @@ bool UnDump::BinToInt(Value* val)
     return true;
 }
 //-----------------------------------------------------------------------------
-bool UnDump::BinToUInt(Value* val)
+bool Undump::BinToUInt(Value* val)
 {
     /*
      * |Value::TYPE(uint8_t)|value|
@@ -158,7 +157,7 @@ bool UnDump::BinToUInt(Value* val)
     return true;
 }
 //-----------------------------------------------------------------------------
-bool UnDump::BinToFloat(Value* val)
+bool Undump::BinToFloat(Value* val)
 {
     /*
      * |Value::TYPE(uint8_t)|value|
@@ -172,7 +171,7 @@ bool UnDump::BinToFloat(Value* val)
     return true;
 }
 //-----------------------------------------------------------------------------
-bool UnDump::BinToBinary(Value* val)
+bool Undump::BinToBinary(Value* val)
 {
     /*
      * |Value::TYPE(uint8_t)|size(uint32_t)|value|
@@ -192,7 +191,7 @@ bool UnDump::BinToBinary(Value* val)
     return true;
 }
 //-----------------------------------------------------------------------------
-bool UnDump::BinToString(Value* val)
+bool Undump::BinToString(Value* val)
 {
     /*
      * |Value::TYPE(uint8_t)|size(uint32_t)|value|
@@ -206,7 +205,7 @@ bool UnDump::BinToString(Value* val)
     return true;
 }
 //-----------------------------------------------------------------------------
-bool UnDump::BinToList(Value* val)
+bool Undump::BinToList(Value* val)
 {
     /*
      * |Value::TYPE(uint8_t)|size(uint32_t)|value|
@@ -232,7 +231,7 @@ bool UnDump::BinToList(Value* val)
     return true;
 }
 //-----------------------------------------------------------------------------
-bool UnDump::BinToSet(Value* val)
+bool Undump::BinToSet(Value* val)
 {
     /*
      * |Value::TYPE(uint8_t)|size(uint32_t)|value|
@@ -258,7 +257,7 @@ bool UnDump::BinToSet(Value* val)
     return true;
 }
 //-----------------------------------------------------------------------------
-bool UnDump::BinToZSet(Value* val)
+bool Undump::BinToZSet(Value* val)
 {
     //read size
 
@@ -287,7 +286,7 @@ bool UnDump::BinToZSet(Value* val)
     return true;
 }
 //-----------------------------------------------------------------------------
-bool UnDump::BinToHash(Value* val)
+bool Undump::BinToHash(Value* val)
 {
     //read size
     uint32_t size;
@@ -315,7 +314,7 @@ bool UnDump::BinToHash(Value* val)
     return true;
 }
 //-----------------------------------------------------------------------------
-bool UnDump::Read(void* buf, size_t len)
+bool Undump::Read(void* buf, size_t len)
 {
     if(true == file_or_bin_)
     {
@@ -334,7 +333,7 @@ bool UnDump::Read(void* buf, size_t len)
     return true;
 }
 //-----------------------------------------------------------------------------
-bool UnDump::ReadType(uint8_t* type)
+bool Undump::ReadType(uint8_t* type)
 {
     if(false == Read(type, sizeof(uint8_t)))
         return false;
@@ -342,7 +341,7 @@ bool UnDump::ReadType(uint8_t* type)
     return true;
 }
 //-----------------------------------------------------------------------------
-bool UnDump::ReadSize(uint32_t* size)
+bool Undump::ReadSize(uint32_t* size)
 {
     if(false == Read(size, sizeof(uint32_t)))
         return false;
@@ -350,7 +349,7 @@ bool UnDump::ReadSize(uint32_t* size)
     return true;
 }
 //-----------------------------------------------------------------------------
-bool UnDump::ReadScore(double* score)
+bool Undump::ReadScore(double* score)
 {
     if(false == Read(score, sizeof(double)))
         return false;
@@ -358,7 +357,7 @@ bool UnDump::ReadScore(double* score)
     return true;
 }
 //-----------------------------------------------------------------------------
-bool UnDump::ReadKey(std::string* key)
+bool Undump::ReadKey(std::string* key)
 {
     //read size
     uint32_t size;
@@ -373,7 +372,7 @@ bool UnDump::ReadKey(std::string* key)
     return true;
 }
 //-----------------------------------------------------------------------------
-bool UnDump::ReadIdName(char id_name[3])
+bool Undump::ReadIdName(char id_name[3])
 {
     if(false == Read(id_name, sizeof(kIDNAME)))
         return false;
@@ -381,7 +380,7 @@ bool UnDump::ReadIdName(char id_name[3])
     return true;
 }
 //-----------------------------------------------------------------------------
-bool UnDump::ReadVersion(char version[4])
+bool Undump::ReadVersion(char version[4])
 {
     if(false == Read(version, sizeof(kVERSION)))
         return false;
@@ -389,7 +388,7 @@ bool UnDump::ReadVersion(char version[4])
     return true;
 }
 //-----------------------------------------------------------------------------
-bool UnDump::ReadEOF(uint8_t* eof)
+bool Undump::ReadEOF(uint8_t* eof)
 {
     if(false == Read(eof, sizeof(uint8_t)))
         return false;
@@ -397,7 +396,7 @@ bool UnDump::ReadEOF(uint8_t* eof)
     return true;
 }
 //-----------------------------------------------------------------------------
-bool UnDump::ReadChecksum(uint64_t* cksum)
+bool Undump::ReadChecksum(uint64_t* cksum)
 {
     if(false == Read(&cksum, sizeof(*cksum)))
         return false;

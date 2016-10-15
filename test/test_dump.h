@@ -36,6 +36,7 @@ private:
     bool TestZSet();
     bool TestHash();
     bool TestMix();
+    bool TestCompSTL();
 };
 
 }

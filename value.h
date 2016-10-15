@@ -150,6 +150,11 @@ public:
     //output
     friend std::ostream& operator<<(std::ostream& out, const Value& val);
 
+public:
+    //dump & undump
+    bool SaveFile(const std::string& path);
+    bool LoadFile(const std::string& path);
+
 private:
     std::string ValueToString(int deep=0, bool add_tabs=true) const;
     template<typename T>std::string UnaryContainerToString(const T& val, int deep) const;

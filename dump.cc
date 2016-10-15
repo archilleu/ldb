@@ -44,11 +44,11 @@ bool Dump::ToBin()
     return true;
 }
 //-----------------------------------------------------------------------------
-bool Dump::ToFile()
+bool Dump::ToFile(const std::string& path)
 {
     //write file
     file_or_bin_ = true;
-    std::string temp_file = "temp-" + dump_name_;
+    std::string temp_file = path + "-temp";
     FILE* fp = fopen(temp_file.c_str(), "w");
     if(0 == fp)
         return false;
@@ -63,7 +63,7 @@ bool Dump::ToFile()
     file_.reset();
 
     //rename file
-    if(-1 == rename(temp_file.c_str(), dump_name_.c_str()))
+    if(-1 == rename(temp_file.c_str(), path.c_str()))
         return false;
 
     return true;
