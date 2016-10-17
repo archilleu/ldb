@@ -13,10 +13,10 @@ OBJS := $(patsubst %.cc,%.o,$(SOURCE))
 CXX=g++
 LDFLAGS+=
 TARGET_NAME=ldb
-INCLUDE_PATH=-I ../bin
-SHARE_LIP_PATH=-L ../bin
-SHARE_LIB=
-PUBLIC_SHARE_LIB=
+INCLUDE_PATH=-I ./base ./net ./json
+SHARE_LIP_PATH=-L ./base -L ./net -L ./json
+SHARE_LIB= -lnet -lbase -ljson
+PUBLIC_SHARE_LIB= -lpthread
 CXX_FLAGS+=-D_REENTRANT -Wall -DCHECK_PTHREAD_RETURN_VALUE -D_FILE_OFFSET_BITS=64 -Wextra -Werror -Wconversion -Wno-unused-parameter -Wold-style-cast -Wpointer-arith -Wshadow -Wwrite-strings -std=c++11
 ifeq ($(debug),y)
 	CXX_FLAGS+=-g -D_DEBUG
