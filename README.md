@@ -1,2 +1,2 @@
 # ldb
-copy redis
+学习 redis
