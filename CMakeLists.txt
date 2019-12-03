@@ -49,11 +49,14 @@ set(LIBRARY_OUTPUT_PATH_INC ${PROJECT_BINARY_DIR}/include)
 #output message
 string(TOUPPER ${CMAKE_BUILD_TYPE} BUILD_TYPE)
 message(STATUS "CXX_FLAGS = " ${CMAKE_CXX_FLAGS} " CMAKE_BUILD_TYPE:" ${CMAKE_CXX_FLAGS_}${BUILD_TYPE})
-message(STATUS "INSTALL PATH ===> bin: " ${EXECUTABLE_OUTPUT_PATH} " lib: "
-    ${LIBRARY_OUTPUT_PATH_LIB} " inc:" ${LIBRARY_OUTPUT_PATH_INC})
+message(STATUS "INSTALL PATH = " ${EXECUTABLE_OUTPUT_PATH} " and " ${LIBRARY_OUTPUT_PATH_LIB} " and " ${LIBRARY_OUTPUT_PATH_INC})
 #---------------------------------------------------------------------------
 #add subdirectory
 #add_subdirectory(<dir>)
 add_subdirectory(src)
-#add_subdirectory(test)
+add_subdirectory(test)
+#---------------------------------------------------------------------------
+#add test
+set(TEST_VALUE test_value)
+add_test(test_run ${EXECUTABLE_OUTPUT_PATH}/${TEST_VALUE})
 #---------------------------------------------------------------------------

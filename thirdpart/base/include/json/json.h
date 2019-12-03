@@ -1,14 +1,9 @@
 //---------------------------------------------------------------------------
-/**
- * 主入口
- */
+#ifndef BASE_JSON_JSON_H_
+#define BASE_JSON_JSON_H_
 //---------------------------------------------------------------------------
-#include <iostream>
 #include "value.h"
-int main(int, char**)
-{
-    db::Value v = db::Value(db::Value::Type::STRING, db::ValuePtr());
-    std::cout << "v:" << v.type() << std::endl;
-    return 0;
-}
+#include "json_reader.h"
+#include "json_writer.h"
 //---------------------------------------------------------------------------
+#endif //BASE_JSON_JSON_H_
