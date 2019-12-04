@@ -15,6 +15,18 @@
 namespace db
 {
 
+//-----------------------------------------------------------------------------
+class type_error : public std::logic_error
+{
+public:
+    type_error(const char* msg="type error")
+    :   std::logic_error(msg)
+    {
+    }
+    virtual ~type_error(){}
+};
+//-----------------------------------------------------------------------------
+
 //value pointer define
 using ValuePtr = std::shared_ptr<class Value>;
 
@@ -69,36 +81,13 @@ public:
     using ZipList       = std::vector<uint8_t>;
 
 public:
-    //Constructor
+    Value(Type type);
+    virtual ~Value();
 
-    //STRING
-    explicit Value(const char* str);
-    Value(const char* ptr, size_t len);
-    explicit Value(const std::string& str);
-
-    //BINARY
-    Value(const uint8_t* ptr, size_t len);
-
-    //LIST
-
-
-private:
-    //Constructor
-    Value(Type type, const ValuePtr& obj);
-
-
-
-
-    //Set method
-
-    //Get method
-
-    //normal method
+public:
     Type type() const { return type_; }
     Encoding encoding() const { return encoding_; }
     base::Timestamp lru() const { return lru_; }
-    const std::shared_ptr<void>& obj() const { return obj_; }
-    std::shared_ptr<void>& obj() { return obj_; }
 
 public:
     //operator overload
@@ -107,10 +96,23 @@ public:
     //friend std::ostream& operator<<(std::ostream& out, const Value& val);
 
 private:
+    virtual void InitPayload()=0;
+
+protected:
     Type type_;                     //类型
     Encoding encoding_;             //编码方式
     base::Timestamp lru_;           //最后一次访问时间
-    std::shared_ptr<void> obj_;     //对象实际内容
+    union ValueHolder
+    {
+        String* string;
+        Binary* binary;
+        LinkedList* linked_list;
+        Set* set;
+        IntSet* intset;
+        SortedSet* sorted_set;
+        Hash* hash;
+        ZipList* zip_list;
+    }val_;
 };
 //---------------------------------------------------------------------------
 //operator overload
