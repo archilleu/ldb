@@ -26,10 +26,9 @@ public:
     virtual ~type_error(){}
 };
 //-----------------------------------------------------------------------------
-
 //value pointer define
 using ValuePtr = std::shared_ptr<class Value>;
-
+//-----------------------------------------------------------------------------
 class Value
 {
 public:
@@ -73,11 +72,11 @@ public:
     //data type alias
     using String        = std::string;
     using Binary        = std::vector<uint8_t>;
-    using LinkedList    = std::list<Value>;
-    using Set           = std::unordered_set<Value>;
+    using LinkedList    = std::list<ValuePtr>;
+    using Set           = std::unordered_set<ValuePtr>;
     using IntSet        = std::vector<uint8_t>;
-    using SortedSet     = std::multimap<double, Value>;
-    using Hash          = std::unordered_map<String, Value>;
+    using SortedSet     = std::multimap<double, ValuePtr>;
+    using Hash          = std::unordered_map<String, ValuePtr>;
     using ZipList       = std::vector<uint8_t>;
 
 public:
@@ -90,10 +89,7 @@ public:
     base::Timestamp lru() const { return lru_; }
 
 public:
-    //operator overload
-
-    //output
-    //friend std::ostream& operator<<(std::ostream& out, const Value& val);
+    const static ValuePtr NullPtr;
 
 private:
     virtual void InitPayload()=0;

@@ -1,12 +1,12 @@
 //---------------------------------------------------------------------------
-#include <climits>
 #include <cassert>
 #include "string_value.h"
-#include <iostream>
 //---------------------------------------------------------------------------
 namespace db
 {
 
+//---------------------------------------------------------------------------
+const StringValuePtr StringValue::NullPtr;
 //---------------------------------------------------------------------------
 StringValue::StringValue()
 :   Value(STRING)
@@ -120,7 +120,7 @@ void StringValue::Swap(StringValue& other)
     std::swap(this->lru_, other.lru_);
 }
 //---------------------------------------------------------------------------
-const Value::String& StringValue::val()
+const std::string& StringValue::val()
 {
     //如果是INT编码，则转换为RAW编码，因为返回值是字符串引用，INT内部没有空间
     if(INT == this->encoding_)
@@ -165,6 +165,11 @@ double StringValue::AsDouble()
     {
         return 0;
     }
+}
+//---------------------------------------------------------------------------
+StringValuePtr StringValue::AsStringPtr(const ValuePtr& value)
+{
+    return std::dynamic_pointer_cast<StringValue>(value);
 }
 //---------------------------------------------------------------------------
 void StringValue::InitPayload()
