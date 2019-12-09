@@ -1,5 +1,4 @@
 //---------------------------------------------------------------------------
-#include <cassert>
 #include "hash_value.h"
 //---------------------------------------------------------------------------
 namespace db
@@ -7,65 +6,13 @@ namespace db
 
 //---------------------------------------------------------------------------
 HashValue::HashValue(size_t reserve_size)
-:   Value(HASH)
+:   Value(HASH, UNORDERED_MAP, reserve_size)
 {
-    this->encoding_ = UNORDERED_MAP;
-
-    InitPayload();
-
-    if(UNORDERED_MAP == this->encoding_)
-    {
-        if(0 != reserve_size)
-            Reserve(reserve_size);
-    }
-
     return;
-}
-//---------------------------------------------------------------------------
-HashValue::HashValue(const HashValue& other)
-:   Value(HASH)
-{
-    this->encoding_ = other.encoding_;
-    InitPayload();
-
-    if(UNORDERED_MAP == this->encoding_)
-        *(this->val_.hash) = *(other.val_.hash);
-    else
-        *(this->val_.zip_list) = *(other.val_.zip_list);
-
-    return;
-}
-//---------------------------------------------------------------------------
-HashValue::HashValue(HashValue&& other)
-:   Value(HASH)
-{
-    this->encoding_ = other.encoding_;
-    InitPayload();
-    Swap(other);
-}
-//---------------------------------------------------------------------------
-HashValue& HashValue::operator=(const HashValue& other)
-{
-    if(this == &other)
-        return *this;
-
-    HashValue(other).Swap(*this);
-    return *this;
-}
-//---------------------------------------------------------------------------
-HashValue& HashValue::operator=(HashValue&& other)
-{
-    other.Swap(*this);
-    return *this;
 }
 //---------------------------------------------------------------------------
 HashValue::~HashValue()
 {
-    if(UNORDERED_MAP == this->encoding_)
-        delete this->val_.hash;
-    else
-        delete this->val_.zip_list;
-
     return;
 }
 //---------------------------------------------------------------------------
@@ -78,7 +25,7 @@ bool HashValue::Empty() const
     else
     {
         //TODO:ziplist
-        assert(0);
+        throw type_error();
     }
 
     return true;
@@ -93,7 +40,7 @@ size_t HashValue::Size() const
     else
     {
         //TODO:ziplist
-        assert(0);
+        throw type_error();
     }
 
     return 0;
@@ -108,7 +55,7 @@ void HashValue::Reserve(size_t size)
     else
     {
         //TODO:ziplist
-        assert(0);
+        throw type_error();
     }
 }
 //---------------------------------------------------------------------------
@@ -121,7 +68,7 @@ void HashValue::Rehash(size_t size)
     else
     {
         //TODO:ziplist
-        assert(0);
+        throw type_error();
     }
 }
 //---------------------------------------------------------------------------
@@ -134,8 +81,9 @@ HashValue::Iterator HashValue::Begin()
     else
     {
         //TODO:ziplist
-        assert(0);
+        throw type_error();
     }
+
     throw type_error();
 }
 //---------------------------------------------------------------------------
@@ -148,7 +96,7 @@ HashValue::Iterator HashValue::End()
     else
     {
         //TODO:ziplist
-        assert(0);
+        throw type_error();
     }
     throw type_error();
 }
@@ -162,7 +110,7 @@ HashValue::ConstIterator HashValue::Begin() const
     else
     {
         //TODO:ziplist
-        assert(0);
+        throw type_error();
     }
     throw type_error();
 }
@@ -176,7 +124,7 @@ HashValue::ConstIterator HashValue::End() const
     else
     {
         //TODO:ziplist
-        assert(0);
+        throw type_error();
     }
     throw type_error();
 }
@@ -222,7 +170,7 @@ const ValuePtr& HashValue::Find(const std::string& key) const
     else
     {
         //TODO:ziplist
-        assert(0);
+        throw type_error();
     }
 
     return Value::NullPtr;
@@ -237,7 +185,7 @@ size_t HashValue::Count(const std::string& key) const
     else
     {
         //TODO:ziplist
-        assert(0);
+        throw type_error();
     }
 
     return 0;
@@ -256,7 +204,7 @@ StringValuePtr HashValue::FindAsString(const std::string& key) const
     else
     {
         //TODO:ziplist
-        assert(0);
+        throw type_error();
     }
 
     return StringValue::NullPtr;
@@ -273,7 +221,7 @@ bool HashValue::Insert(const std::string& key, const ValuePtr& value)
     else
     {
         //TODO:ziplist
-        assert(0);
+        throw type_error();
     }
 
     return false;
@@ -290,7 +238,7 @@ bool HashValue::Insert(std::string&& key, ValuePtr&& value)
     else
     {
         //TODO:ziplist
-        assert(0);
+        throw type_error();
     }
 
     return false;
@@ -305,7 +253,7 @@ bool HashValue::Erase(const std::string& key)
     else
     {
         //TODO:ziplist
-        assert(0);
+        throw type_error();
     }
 
     return false;
@@ -320,34 +268,15 @@ void HashValue::Clear()
     else
     {
         //TODO:ziplist
-        assert(0);
+        throw type_error();
     }
 
     return;
 }
 //---------------------------------------------------------------------------
-void HashValue::Swap(HashValue& other)
-{
-    std::swap(this->encoding_, other.encoding_);
-    std::swap(this->val_, other.val_);
-    std::swap(this->lru_, other.lru_);
-}
-//---------------------------------------------------------------------------
 HashValuePtr HashValue::AsHashPtr(ValuePtr value)
 {
     return std::dynamic_pointer_cast<HashValue>(value);
-}
-//---------------------------------------------------------------------------
-void HashValue::InitPayload()
-{
-    assert(this->type() == HASH);
-
-    if(UNORDERED_MAP == this->encoding())
-        this->val_.hash = new Hash();
-    else
-        this->val_.zip_list = new ZipList();
-
-    return;
 }
 //---------------------------------------------------------------------------
 

@@ -1,5 +1,4 @@
 //---------------------------------------------------------------------------
-#include <cassert>
 #include "string_value.h"
 //---------------------------------------------------------------------------
 namespace db
@@ -9,115 +8,61 @@ namespace db
 const StringValuePtr StringValue::NullPtr;
 //---------------------------------------------------------------------------
 StringValue::StringValue()
-:   Value(STRING)
+:   Value(STRING, INT)
 {
-    this->encoding_ = RAW;
-    InitPayload();
-}
-//---------------------------------------------------------------------------
-StringValue::StringValue(const char* str)
-:   Value(STRING)
-{
-    this->encoding_ = RAW;
-    InitPayload();
-    this->val_.string->assign(str);
-}
-//---------------------------------------------------------------------------
-StringValue::StringValue(const char* ptr, size_t len)
-:   Value(STRING)
-{
-    this->encoding_ = RAW;
-    InitPayload();
-    this->val_.string->assign(ptr, len);
-}
-//---------------------------------------------------------------------------
-StringValue::StringValue(const std::string& str)
-:   Value(STRING)
-{
-    this->encoding_ = RAW;
-    InitPayload();
-    this->val_.string->assign(str);
-}
-//---------------------------------------------------------------------------
-StringValue::StringValue(int32_t value)
-:   Value(STRING)
-{
-    //TODO:use shared int
-
-    this->encoding_ = INT;
-    InitPayload();
-    this->val_.string = reinterpret_cast<String*>(value);
-}
-//---------------------------------------------------------------------------
-StringValue::StringValue(int64_t value)
-:   Value(STRING)
-{
-    //TODO:use shared int
-
-    this->encoding_ = INT;
-    InitPayload();
-    this->val_.string = reinterpret_cast<String*>(value);
-}
-//---------------------------------------------------------------------------
-StringValue::StringValue(double value)
-:   Value(STRING)
-{
-    this->encoding_ = RAW;
-    InitPayload();
-    std::string str = std::to_string(value);
-    this->val_.string->assign(str);
-}
-//---------------------------------------------------------------------------
-StringValue::StringValue(const StringValue& other)
-:   Value(STRING)
-{
-    this->encoding_ = other.encoding_;
-    InitPayload();
-
-    if(RAW == this->encoding_)
-        *(this->val_.string) = *(other.val_.string);
-    else
-        this->val_.string = other.val_.string;
-
     return;
 }
 //---------------------------------------------------------------------------
-StringValue::StringValue(StringValue&& other)
-:   Value(STRING)
+StringValue::StringValue(const char* str)
+:   Value(STRING, RAW)
 {
-    this->encoding_ = INT;
-    InitPayload();
-    Swap(other);
+    this->val_.string->assign(str);
+    return;
 }
 //---------------------------------------------------------------------------
-StringValue& StringValue::operator=(const StringValue& other)
+StringValue::StringValue(const char* ptr, size_t len)
+:   Value(STRING, RAW)
 {
-    if(this == &other)
-        return *this;
+    this->val_.string->assign(ptr, len);
+    return;
+}
+//---------------------------------------------------------------------------
+StringValue::StringValue(const std::string& str)
+:   Value(STRING, RAW)
+{
+    this->val_.string->assign(str);
+    return;
+}
+//---------------------------------------------------------------------------
+StringValue::StringValue(int32_t value)
+:   Value(STRING, INT)
+{
+    //TODO:use shared int
 
-    StringValue(other).Swap(*this);
-    return *this;
+    this->val_.string = reinterpret_cast<String*>(value);
+    return;
 }
 //---------------------------------------------------------------------------
-StringValue& StringValue::operator=(StringValue&& other)
+StringValue::StringValue(int64_t value)
+:   Value(STRING, INT)
 {
-    other.Swap(*this);
-    return *this;
+    //TODO:use shared int
+
+    this->val_.string = reinterpret_cast<String*>(value);
+    return;
+}
+//---------------------------------------------------------------------------
+StringValue::StringValue(double value)
+:   Value(STRING, RAW)
+{
+    std::string str = std::to_string(value);
+    this->val_.string->assign(str);
+    return;
 }
 //---------------------------------------------------------------------------
 StringValue::~StringValue()
 {
-    if(INT == this->encoding_)
-        return;
-
-    delete this->val_.string;
-}
-//---------------------------------------------------------------------------
-void StringValue::Swap(StringValue& other)
-{
-    std::swap(this->encoding_, other.encoding_);
-    std::swap(this->val_, other.val_);
-    std::swap(this->lru_, other.lru_);
+    return;
 }
 //---------------------------------------------------------------------------
 const std::string& StringValue::val()
@@ -126,7 +71,10 @@ const std::string& StringValue::val()
     if(INT == this->encoding_)
     {
         this->encoding_ = Value::Encoding::RAW;
-        this->val_.string = new String(std::to_string(reinterpret_cast<int64_t>(this->val_.string)));
+        if(0 == this->val_.string)
+            this->val_.string = new String();
+        else
+            this->val_.string = new String(std::to_string(reinterpret_cast<int64_t>(this->val_.string)));
     }
 
     return *(this->val_.string);
@@ -154,6 +102,12 @@ int64_t StringValue::AsInt()
 //---------------------------------------------------------------------------
 double StringValue::AsDouble()
 {
+    //无参构造函数
+    if(INT == this->encoding_)
+    {
+        return 0;
+    }
+
     if(this->val_.string->empty())
         return 0;
 
@@ -169,17 +123,7 @@ double StringValue::AsDouble()
 //---------------------------------------------------------------------------
 StringValuePtr StringValue::AsStringPtr(const ValuePtr& value)
 {
-    return std::dynamic_pointer_cast<StringValue>(value);
-}
-//---------------------------------------------------------------------------
-void StringValue::InitPayload()
-{
-    assert(this->type() == STRING);
-
-    if(RAW == this->encoding())
-        this->val_.string = new String();
-    else
-        this->val_.string = 0;
+    return std::static_pointer_cast<StringValue>(value);
 }
 //---------------------------------------------------------------------------
 

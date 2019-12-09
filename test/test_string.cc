@@ -14,7 +14,7 @@ int main(int, char**)
     {
     StringValue str;
     TEST_ASSERT(str.type() == Value::STRING);
-    TEST_ASSERT(str.encoding() == Value::RAW);
+    TEST_ASSERT(str.encoding() == Value::INT);
     TEST_ASSERT(str.val() == "");
     TEST_ASSERT(str.AsInt() == 0);
     TEST_ASSERT(str.AsDouble() == 0);
@@ -114,22 +114,17 @@ int main(int, char**)
     StringValue copy(std::move(val));
     StringValue copy1 = std::move(copy);
 
+    TEST_ASSERT(val.type() == Value::STRING);
+    TEST_ASSERT(val.encoding() == Value::INT);
+    TEST_ASSERT(val.AsInt() == 0);
+    TEST_ASSERT(val.lru() == base::Timestamp::Invalid());
+    TEST_ASSERT(val.AsDouble() == static_cast<double>(0));
+
     TEST_ASSERT(copy1.type() == Value::STRING);
     TEST_ASSERT(copy1.encoding() == Value::RAW);
     TEST_ASSERT(copy1.val() == s);
     TEST_ASSERT(copy1.AsInt() == 0);
     TEST_ASSERT(copy1.AsDouble() == 0);
-
-    TEST_ASSERT(val.type() == Value::STRING);
-    TEST_ASSERT(val.encoding() == Value::INT);
-    TEST_ASSERT(val.val() == "0");
-    TEST_ASSERT(val.AsInt() == 0);
-    TEST_ASSERT(val.AsDouble() == 0);
-    TEST_ASSERT(copy.type() == Value::STRING);
-    TEST_ASSERT(copy.encoding() == Value::INT);
-    TEST_ASSERT(copy.val() == "0");
-    TEST_ASSERT(copy.AsInt() == 0);
-    TEST_ASSERT(copy.AsDouble() == 0);
     }
 
     //赋值
@@ -190,9 +185,9 @@ int main(int, char**)
 
     TEST_ASSERT(val1.type() == Value::STRING);
     TEST_ASSERT(val1.encoding() == Value::INT);
-    TEST_ASSERT(val1.val() == "20");
-    TEST_ASSERT(val1.AsInt() == i2);
-    TEST_ASSERT(val1.AsDouble() == static_cast<double>(i2));
+    TEST_ASSERT(val1.AsInt() == 0);
+    TEST_ASSERT(val1.lru() == base::Timestamp::Invalid());
+    TEST_ASSERT(val1.AsDouble() == static_cast<double>(0));
     }
 
     //直接赋值

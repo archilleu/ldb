@@ -21,13 +21,11 @@ public:
     StringValue(int32_t value);
     StringValue(int64_t value);
     StringValue(double value);
-    StringValue(const StringValue& other);
-    StringValue(StringValue&& other);
-    StringValue& operator=(const StringValue& other);
-    StringValue& operator=(StringValue&& other);
+    StringValue(StringValue& other)=default;
+    StringValue(StringValue&& other)=default;
+    StringValue& operator=(const StringValue& other)=default;
+    StringValue& operator=(StringValue&& other)=default;
     virtual ~StringValue();
-
-    void Swap(StringValue& other);
 
 public:
     const std::string& val();
@@ -39,9 +37,6 @@ public:
 
 public:
     const static std::shared_ptr<StringValue> NullPtr;
-
-private:
-    virtual void InitPayload();
 };
 
 }//namespace db

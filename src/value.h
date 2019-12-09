@@ -79,9 +79,16 @@ public:
     using Hash          = std::unordered_map<String, ValuePtr>;
     using ZipList       = std::vector<uint8_t>;
 
-public:
-    Value(Type type);
+protected:
+    Value(Type type, Encoding encoding, size_t reserve_size=0);
+    Value(const Value& other);
+    Value(Value&& other);
+    Value& operator=(const Value& other);
+    Value& operator=(Value&& other);
     virtual ~Value();
+
+public:
+    void Swap(Value& other);
 
 public:
     Type type() const { return type_; }
@@ -92,7 +99,9 @@ public:
     const static ValuePtr NullPtr;
 
 private:
-    virtual void InitPayload()=0;
+    void InitPayload(size_t reserve_size);
+    void DupPayload(const Value& other);
+    void ReleasePayload();
 
 protected:
     Type type_;                     //类型

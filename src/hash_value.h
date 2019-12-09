@@ -15,10 +15,10 @@ class HashValue : public Value
 {
 public:
     HashValue(size_t reserve_size=0);
-    HashValue(const HashValue& other);
-    HashValue(HashValue&& other);
-    HashValue& operator=(const HashValue& other);
-    HashValue& operator=(HashValue&& other);
+    HashValue(const HashValue& other)=default;
+    HashValue(HashValue&& other)=default;
+    HashValue& operator=(const HashValue& other)=default;
+    HashValue& operator=(HashValue&& other)=default;
     virtual ~HashValue();
 
 public:
@@ -54,15 +54,10 @@ public:
     bool Erase(const std::string& key);
     void Clear();
 
-    void Swap(HashValue& other);
-
     static HashValuePtr AsHashPtr(ValuePtr value);
 
 public:
     const static HashValue NullPtr;
-
-private:
-    virtual void InitPayload();
 };
 
 }//namespace db
