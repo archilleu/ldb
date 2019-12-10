@@ -1,5 +1,4 @@
 //---------------------------------------------------------------------------
-#include <cassert>
 #include "list_value.h"
 //---------------------------------------------------------------------------
 namespace db
@@ -217,7 +216,8 @@ void ListValue::PushFront(const ValuePtr& value)
 {
     if(LINKED_LIST == this->encoding_)
     {
-        return this->val_.linked_list->push_back(value);
+        this->val_.linked_list->push_back(value);
+        return;
     }
     else
     {
@@ -231,7 +231,8 @@ void ListValue::PopFront()
 {
     if(LINKED_LIST == this->encoding_)
     {
-        return this->val_.linked_list->pop_front();
+        this->val_.linked_list->pop_front();
+        return;
     }
     else
     {
@@ -245,7 +246,8 @@ void ListValue::PushBack(const ValuePtr& value)
 {
     if(LINKED_LIST == this->encoding_)
     {
-        return this->val_.linked_list->push_back(value);
+        this->val_.linked_list->push_back(value);
+        return;
     }
     else
     {
@@ -259,7 +261,8 @@ void ListValue::PopBack()
 {
     if(LINKED_LIST == this->encoding_)
     {
-        return this->val_.linked_list->pop_back();
+        this->val_.linked_list->pop_back();
+        return;
     }
     else
     {
@@ -315,36 +318,8 @@ void ListValue::Clear()
 {
     if(LINKED_LIST == this->encoding_)
     {
-        return this->val_.linked_list->clear();
-    }
-    else
-    {
-        throw type_error();
-    }
-
-    throw type_error();
-}
-//---------------------------------------------------------------------------
-void ListValue::Sort()
-{
-    if(LINKED_LIST == this->encoding_)
-    {
-        return this->val_.linked_list->sort();
-    }
-    else
-    {
-        throw type_error();
-    }
-
-    throw type_error();
-}
-//---------------------------------------------------------------------------
-template<class Compare>
-void ListValue::Sort(Compare comp)
-{
-    if(LINKED_LIST == this->encoding_)
-    {
-        return this->val_.linked_list->sort(comp);
+        this->val_.linked_list->clear();
+        return;
     }
     else
     {

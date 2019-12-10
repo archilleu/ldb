@@ -23,7 +23,7 @@ int main(int, char**)
     size_t size = 1024;
     for(size_t i=0; i<size; i++)
     {
-    list.PushFront(StringValuePtr(new StringValue(std::to_string(i))));
+    list.PushBack(StringValuePtr(new StringValue(std::to_string(i))));
     }
     TEST_ASSERT(false == list.Empty());
     TEST_ASSERT(size == list.Size());
@@ -51,7 +51,7 @@ int main(int, char**)
     for(size_t i=0; i<size; i++)
     {
     TEST_ASSERT(static_cast<long>(i) == StringValue::AsStringPtr(assgin_move.Front())->AsInt());
-    list.PopFront();
+    assgin_move.PopFront();
     }
     }
 
@@ -73,21 +73,22 @@ int main(int, char**)
     num = 0;
     for(ListValue::Iterator it=list.Begin(); it!=list.End(); it++)
     {
-    *(StringValue::AsStringPtr(*it)) = std::to_string(num);
+    long test = static_cast<long>((num++)*2);
+    *(StringValue::AsStringPtr(*it)) = std::to_string(test);
     }
 
     num = 0;
     for(ListValue::ConstIterator it=list.Begin(); it!=list.End(); it++)
     {
-    num++;
-    TEST_ASSERT(static_cast<long>(num*2)==StringValue::AsStringPtr(*it)->AsInt());
+    long test = static_cast<long>((num++)*2);
+    TEST_ASSERT(test==StringValue::AsStringPtr(*it)->AsInt());
     }
 
-    num = size;
+    num = --size;
     for(ListValue::ReverseIterator it=list.RBegin(); it!=list.REnd(); it++)
     {
-    num--;
-    TEST_ASSERT(static_cast<long>(num*2)==StringValue::AsStringPtr(*it)->AsInt());
+    long test = static_cast<long>((num--)*2);
+    TEST_ASSERT(static_cast<long>(test)==StringValue::AsStringPtr(*it)->AsInt());
     }
 
     }
@@ -134,7 +135,7 @@ int main(int, char**)
     TEST_ASSERT(false == list.Empty());
     TEST_ASSERT(size == list.Size());
 
-    for(size_t i=size; static_cast<ssize_t>(i)>=0; i--)
+    for(size_t i=size-1; static_cast<ssize_t>(i)>=0; i--)
     {
     TEST_ASSERT(static_cast<long>(i) == StringValue::AsStringPtr(list.Back())->AsInt());
     list.PopBack();
@@ -155,9 +156,9 @@ int main(int, char**)
     TEST_ASSERT(false == list.Empty());
     TEST_ASSERT(size == list.Size());
 
-    for(size_t i=size; static_cast<ssize_t>(i)>=0; i--)
+    for(size_t i=size-1; static_cast<ssize_t>(i)>=0; i--)
     {
-    ListValue::Iterator it = list.Erase(++list.End());
+    ListValue::Iterator it = list.Erase(--list.End());
     TEST_ASSERT(list.End() == it);
     }
     TEST_ASSERT(true == list.Empty());
@@ -206,12 +207,19 @@ int main(int, char**)
     {
     list.PushBack(StringValuePtr(new StringValue(std::to_string(std::rand()))));
     }
-    list.Sort();
+    list.Sort([](const ValuePtr& left, const ValuePtr& right)->
+            bool
+            {
+            StringValuePtr l = StringValue::AsStringPtr(left);
+            StringValuePtr r = StringValue::AsStringPtr(right);
+            return l->AsInt()<r->AsInt(); 
+            });
 
     for(ListValue::ConstIterator it=list.Begin(); it!=--list.End(); it++)
     {
         double v1 = StringValue::AsStringPtr(*it)->AsDouble();
-        double v2 = StringValue::AsStringPtr(*(it++))->AsDouble();
+        double v2 = StringValue::AsStringPtr(*(++it))->AsDouble();
+        it--;
         TEST_ASSERT(v1 <= v2);
     }
 

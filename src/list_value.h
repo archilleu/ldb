@@ -58,17 +58,31 @@ public:
     Iterator Erase(ConstIterator first, ConstIterator last);
     void Clear();
 
-    //operations
-    void Sort();
     //自定义函数对象或函数指针排序
-    template<class Compare> void Sort(Compare comp);
+    template<class Compare>
+    void Sort(Compare comp);
 
     static ListValuePtr AsListPtr(ValuePtr value);
 
 public:
     const static ListValue NullPtr;
 };
+//---------------------------------------------------------------------------
+template<class Compare>
+void ListValue::Sort(Compare comp)
+{
+    if(LINKED_LIST == this->encoding_)
+    {
+        this->val_.linked_list->sort(comp);
+        return;
+    }
+    else
+    {
+        throw type_error();
+    }
 
+    throw type_error();
+}
 }//namespace db
 //---------------------------------------------------------------------------
 #endif //DB_LIST_VALUE_H_
