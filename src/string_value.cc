@@ -5,8 +5,6 @@ namespace db
 {
 
 //---------------------------------------------------------------------------
-const StringValuePtr StringValue::NullPtr;
-//---------------------------------------------------------------------------
 StringValue::StringValue()
 :   Value(STRING, INT)
 {
@@ -52,6 +50,15 @@ StringValue::StringValue(int64_t value)
     return;
 }
 //---------------------------------------------------------------------------
+StringValue::StringValue(size_t value)
+:   Value(STRING, INT)
+{
+    //TODO:use shared int
+
+    this->val_.string = reinterpret_cast<String*>(value);
+    return;
+}
+//---------------------------------------------------------------------------
 StringValue::StringValue(double value)
 :   Value(STRING, RAW)
 {
@@ -63,6 +70,62 @@ StringValue::StringValue(double value)
 StringValue::~StringValue()
 {
     return;
+}
+//---------------------------------------------------------------------------
+StringValue& StringValue::operator=(const char* str)
+{
+    if(RAW == this->encoding_)
+    {
+        this->val_.string->assign(str);
+    }
+    else
+    {
+        this->encoding_ = RAW;
+        this->val_.string = new String(str);
+    }
+
+    return *this;
+}
+//---------------------------------------------------------------------------
+StringValue& StringValue::operator=(const String& str)
+{
+    *this = str.c_str();
+    return *this;
+}
+//---------------------------------------------------------------------------
+StringValue& StringValue::operator=(const int32_t value)
+{
+    return *this = static_cast<int64_t>(value);
+}
+//---------------------------------------------------------------------------
+StringValue& StringValue::operator=(const int64_t value)
+{
+    if(INT == this->encoding_)
+    {
+        this->val_.string = reinterpret_cast<String*>(value);
+    }
+    else
+    {
+        this->val_.string->assign(std::to_string(value));
+    }
+
+    return *this;
+}
+//---------------------------------------------------------------------------
+StringValue& StringValue::operator=(const double value)
+{
+    std::string str = std::to_string(value);
+    if(INT == this->encoding_)
+    {
+        this->encoding_ = RAW;
+        this->val_.string = new String(str);
+    }
+    else
+    {
+        this->val_.string->assign(str);
+    }
+
+    return *this;
 }
 //---------------------------------------------------------------------------
 const std::string& StringValue::val()
@@ -119,11 +182,6 @@ double StringValue::AsDouble()
     {
         return 0;
     }
-}
-//---------------------------------------------------------------------------
-StringValuePtr StringValue::AsStringPtr(const ValuePtr& value)
-{
-    return std::static_pointer_cast<StringValue>(value);
 }
 //---------------------------------------------------------------------------
 

@@ -8,9 +8,6 @@ namespace db
 {
 
 //---------------------------------------------------------------------------
-//hash pointer define
-using ListValuePtr = std::shared_ptr<class ListValue>;
-//---------------------------------------------------------------------------
 class ListValue : public Value
 {
 public:
@@ -42,30 +39,49 @@ public:
     ReverseConstIterator REnd() const;
     
     //element access
-    ValuePtr& Front();
-    const ValuePtr& Front() const;
-    ValuePtr& Back();
-    const ValuePtr& Back() const;
+    ObjectPtr& Front();
+    const ObjectPtr& Front() const;
+    ObjectPtr& Back();
+    const ObjectPtr& Back() const;
 
     //modifiers
-    void PushFront(const ValuePtr& value);
+    void PushFront(const ObjectPtr& value);
+    void PushFront(const ObjectPtr&& value);
+    void PushFront(const char* value);
+    void PushFront(const String& value);
+    void PushFront(String&& value);
+    void PushFront(int32_t value);
+    void PushFront(int64_t value);
+    void PushFront(double value);
     void PopFront();
-    void PushBack(const ValuePtr& value);
+
+    void PushBack(const ObjectPtr& value);
+    void PushBack(const ObjectPtr&& value);
+    void PushBack(const char* value);
+    void PushBack(const String& value);
+    void PushBack(String&& value);
+    void PushBack(int32_t value);
+    void PushBack(int64_t value);
+    void PushBack(double value);
     void PopBack();
 
-    Iterator Insert(ConstIterator position, const ValuePtr& val);
+    Iterator Insert(ConstIterator position, const ObjectPtr& value);
+    Iterator Insert(ConstIterator position, const ObjectPtr&& value);
+    Iterator Insert(ConstIterator position, const char* value);
+    Iterator Insert(ConstIterator position, const String& value);
+    Iterator Insert(ConstIterator position, String&& value);
+    Iterator Insert(ConstIterator position, int32_t value);
+    Iterator Insert(ConstIterator position, int64_t value);
+    Iterator Insert(ConstIterator position, double value);
+
     Iterator Erase(ConstIterator position);
     Iterator Erase(ConstIterator first, ConstIterator last);
+
     void Clear();
 
     //自定义函数对象或函数指针排序
     template<class Compare>
     void Sort(Compare comp);
-
-    static ListValuePtr AsListPtr(ValuePtr value);
-
-public:
-    const static ListValue NullPtr;
 };
 //---------------------------------------------------------------------------
 template<class Compare>

@@ -2,14 +2,11 @@
 #ifndef DB_HASH_VALUE_H_
 #define DB_HASH_VALUE_H_
 //---------------------------------------------------------------------------
-#include "string_value.h"
+#include "value.h"
 //---------------------------------------------------------------------------
 namespace db
 {
 
-//---------------------------------------------------------------------------
-//hash pointer define
-using HashValuePtr = std::shared_ptr<class HashValue>;
 //---------------------------------------------------------------------------
 class HashValue : public Value
 {
@@ -40,24 +37,34 @@ public:
     ConstIterator End() const;
     
     //element access
-    ValuePtr& operator[] (const std::string& key);
-    ValuePtr& operator[] (std::string&& key);
+    ObjectPtr& operator[] (const std::string& key);
+    ObjectPtr& operator[] (std::string&& key);
 
     //element lookup
-    const ValuePtr& Find(const std::string& key) const;
+    Iterator Find(const char* key);
+    Iterator Find(const std::string& key);
+    ConstIterator Find(const char* key) const;
+    ConstIterator Find(const std::string& key) const;
+
+    size_t Count(const char* key) const;
     size_t Count(const std::string& key) const;
-    StringValuePtr FindAsString(const std::string& key) const;
 
     //modifiers
-    bool Insert(const std::string& key, const ValuePtr& value);
-    bool Insert(std::string&& key, ValuePtr&& value);
+    bool Insert(const std::string& key, const ObjectPtr& val);
+    bool Insert(std::string&& key, ObjectPtr&& val);
+    bool Insert(const std::string& key, String& val);
+    bool Insert(std::string&& key, String&& val);
+    bool Insert(std::string& key, int32_t val);
+    bool Insert(std::string&& key, int32_t val);
+    bool Insert(std::string& key, int64_t val);
+    bool Insert(std::string&& key, int64_t val);
+    bool Insert(std::string& key, double val);
+    bool Insert(std::string&& key, double val);
+
+    bool Erase(const char* key);
     bool Erase(const std::string& key);
+
     void Clear();
-
-    static HashValuePtr AsHashPtr(ValuePtr value);
-
-public:
-    const static HashValue NullPtr;
 };
 
 }//namespace db

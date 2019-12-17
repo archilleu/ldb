@@ -8,9 +8,6 @@ namespace db
 {
 
 //---------------------------------------------------------------------------
-//string pointer define
-using StringValuePtr = std::shared_ptr<class StringValue>;
-//---------------------------------------------------------------------------
 class StringValue : public Value
 {
 public:
@@ -20,6 +17,7 @@ public:
     StringValue(const std::string& str);
     StringValue(int32_t value);
     StringValue(int64_t value);
+    StringValue(size_t value);
     StringValue(double value);
     StringValue(StringValue& other)=default;
     StringValue(StringValue&& other)=default;
@@ -27,16 +25,17 @@ public:
     StringValue& operator=(StringValue&& other)=default;
     virtual ~StringValue();
 
+    StringValue& operator=(const char* str);
+    StringValue& operator=(const String& str);
+    StringValue& operator=(const int32_t value);
+    StringValue& operator=(const int64_t value);
+    StringValue& operator=(const double value);
+
 public:
     const std::string& val();
 
     int64_t AsInt();
     double AsDouble();
-
-    static StringValuePtr AsStringPtr(const ValuePtr& value);
-
-public:
-    const static std::shared_ptr<StringValue> NullPtr;
 };
 
 }//namespace db

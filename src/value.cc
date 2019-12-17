@@ -5,7 +5,49 @@ namespace db
 {
 
 //---------------------------------------------------------------------------
-const ValuePtr Value::NullPtr;
+size_t Value::HashFunc::operator()(const ObjectPtr& value) const
+{
+    switch(value.object()->type())
+    {
+        case STRING:
+        {
+            switch(value.object()->encoding())
+            {
+                case RAW:
+                {
+                    std::hash<String> hash_fn;
+                    return hash_fn(*value.object()->val_.string);
+                }
+
+                case INT:
+                {
+                    std::hash<long> hash_fn;
+                    return hash_fn(reinterpret_cast<size_t>(value.object()->val_.string));
+                }
+            
+                default:
+                    throw type_error();
+            }
+            break;
+        }
+
+        case BINARY:
+        case HASH:
+        case LIST:
+        case SET:
+        case ZSET:
+        {
+            std::hash<void*> hash_fn;
+            return hash_fn(value.object()->val_.string);
+            break;
+        }
+
+        default:
+            throw type_error();
+    }
+
+    return 0;
+}
 //---------------------------------------------------------------------------
 Value::Value(Type type, Encoding encoding, size_t reserve_size)
 {
@@ -51,6 +93,9 @@ Value& Value::operator=(Value&& other)
     if(this == &other)
         return *this;
 
+    //释放旧空间
+    ReleasePayload();
+
     type_ = other.type_;
     encoding_ = other.encoding_;
     lru_ = other.lru_;
@@ -69,6 +114,103 @@ Value::~Value()
 
     val_.string = 0;
     return;
+}
+//---------------------------------------------------------------------------
+bool Value::operator==(const Value& other) const
+{
+    if(this == &other)
+        return true;
+
+    if(type_ != other.type_ )
+        return false;
+
+    if(encoding_ != other.encoding_)
+        return false;
+
+    if(0==val_.string && 0==other.val_.string)
+        return true;
+    
+    switch(type_)
+    {
+        case STRING:
+        {
+            switch(encoding_)
+            {
+                case RAW:
+                    return *val_.string == *other.val_.string;
+
+                case INT:
+                    return val_.string == other.val_.string;
+            
+                default:
+                    throw type_error();
+            }
+            break;
+        }
+
+        case BINARY:
+        {
+            return *val_.binary == *other.val_.binary;
+        }
+
+        case HASH:
+        {
+            switch(encoding_)
+            {
+                case UNORDERED_MAP:
+                    return *val_.hash == *other.val_.hash;
+
+                case ZIPLIST:
+                    return *val_.zip_list == *other.val_.zip_list;
+
+                default:
+                    throw type_error();
+            }
+            break;
+        }
+
+        case LIST:
+        {
+            switch(encoding_)
+            {
+                case LINKED_LIST:
+                    return *val_.linked_list == *other.val_.linked_list;
+
+                case ZIPLIST:
+                    return *val_.zip_list == *other.val_.zip_list;
+
+                default:
+                    throw type_error();
+            }
+            break;
+        }
+
+        case SET:
+        {
+            switch(encoding_)
+            {
+                case UNORDERED_SET:
+                    return *val_.set == *other.val_.set;
+
+                case INT_SET:
+                    return *val_.intset == *other.val_.intset;
+
+                default:
+                    break;
+            }
+            break;
+        }
+
+        case ZSET:
+        {
+            return *val_.sorted_set == *other.val_.sorted_set;
+        }
+
+        default:
+            throw type_error();
+    }
+
+    return true;
 }
 //---------------------------------------------------------------------------
 void Value::Swap(Value& other)
@@ -373,6 +515,16 @@ void Value::ReleasePayload()
     }
 
     return;
+}
+//---------------------------------------------------------------------------
+bool operator==(const ObjectPtr& left, const ObjectPtr& right)
+{
+    return *left.object() == *right.object();
+}
+//---------------------------------------------------------------------------
+bool operator!=(const ObjectPtr& left, const ObjectPtr& right)
+{
+    return !(*left.object() == *right.object());
 }
 //---------------------------------------------------------------------------
 }//namespace db

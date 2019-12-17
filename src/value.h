@@ -11,23 +11,12 @@
 #include <memory>
 
 #include "../thirdpart/base/include/timestamp.h"
+
+#include "object_ptr.h"
 //-----------------------------------------------------------------------------
 namespace db
 {
 
-//-----------------------------------------------------------------------------
-class type_error : public std::logic_error
-{
-public:
-    type_error(const char* msg="type error")
-    :   std::logic_error(msg)
-    {
-    }
-    virtual ~type_error(){}
-};
-//-----------------------------------------------------------------------------
-//value pointer define
-using ValuePtr = std::shared_ptr<class Value>;
 //-----------------------------------------------------------------------------
 class Value
 {
@@ -69,14 +58,20 @@ public:
         ZIPLIST,                    //TODO:压缩列表
     };
 
+    //哈希函数，用于Set
+    struct HashFunc
+    {
+        size_t operator()(const ObjectPtr& value) const;
+    };
+
     //data type alias
     using String        = std::string;
     using Binary        = std::vector<uint8_t>;
-    using LinkedList    = std::list<ValuePtr>;
-    using Set           = std::unordered_set<ValuePtr>;
+    using LinkedList    = std::list<ObjectPtr>;
+    using Set           = std::unordered_set<ObjectPtr, HashFunc>;
     using IntSet        = std::vector<uint8_t>;
-    using SortedSet     = std::multimap<double, ValuePtr>;
-    using Hash          = std::unordered_map<String, ValuePtr>;
+    using SortedSet     = std::multimap<double, ObjectPtr>;
+    using Hash          = std::unordered_map<String, ObjectPtr>;
     using ZipList       = std::vector<uint8_t>;
 
 protected:
@@ -85,9 +80,12 @@ protected:
     Value(Value&& other);
     Value& operator=(const Value& other);
     Value& operator=(Value&& other);
-    virtual ~Value();
 
 public:
+    virtual ~Value();
+
+    bool operator==(const Value& other) const;
+
     void Swap(Value& other);
 
 public:
@@ -96,7 +94,7 @@ public:
     base::Timestamp lru() const { return lru_; }
 
 public:
-    const static ValuePtr NullPtr;
+    friend class ObjectPtr;
 
 private:
     void InitPayload(size_t reserve_size);
@@ -119,6 +117,19 @@ protected:
         ZipList* zip_list;
     }val_;
 };
+//-----------------------------------------------------------------------------
+class type_error : public std::logic_error
+{
+public:
+    type_error(const char* msg="type error")
+    :   std::logic_error(msg)
+    {
+    }
+    virtual ~type_error(){}
+};
+//---------------------------------------------------------------------------
+bool operator==(const ObjectPtr& left, const ObjectPtr& right);
+bool operator!=(const ObjectPtr& left, const ObjectPtr& right);
 //---------------------------------------------------------------------------
 //operator overload
 //std::ostream& operator<<(std::ostream& out, const Value& val);

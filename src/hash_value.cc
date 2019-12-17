@@ -1,5 +1,6 @@
 //---------------------------------------------------------------------------
 #include "hash_value.h"
+#include "string_value.h"
 //---------------------------------------------------------------------------
 namespace db
 {
@@ -129,7 +130,7 @@ HashValue::ConstIterator HashValue::End() const
     throw type_error();
 }
 //---------------------------------------------------------------------------
-ValuePtr& HashValue::operator[] (const std::string& key)
+ObjectPtr& HashValue::operator[] (const std::string& key)
 {
     if(UNORDERED_MAP == this->encoding_)
     {
@@ -143,7 +144,7 @@ ValuePtr& HashValue::operator[] (const std::string& key)
     throw type_error();
 }
 //---------------------------------------------------------------------------
-ValuePtr& HashValue::operator[] (std::string&& key)
+ObjectPtr& HashValue::operator[] (std::string&& key)
 {
     if(UNORDERED_MAP == this->encoding_)
     {
@@ -157,26 +158,43 @@ ValuePtr& HashValue::operator[] (std::string&& key)
     throw type_error();
 }
 //---------------------------------------------------------------------------
-const ValuePtr& HashValue::Find(const std::string& key) const
+HashValue::Iterator HashValue::Find(const char* key)
 {
     if(UNORDERED_MAP == this->encoding_)
     {
-        auto got = this->val_.hash->find(key);
-        if(got == this->val_.hash->end())
-            return Value::NullPtr;
-
-        return got->second;
+        return this->val_.hash->find(key);
     }
     else
     {
         //TODO:ziplist
         throw type_error();
     }
-
-    return Value::NullPtr;
 }
 //---------------------------------------------------------------------------
-size_t HashValue::Count(const std::string& key) const
+HashValue::Iterator HashValue::Find(const String& key)
+{
+    return Find(key.c_str());
+}
+//---------------------------------------------------------------------------
+HashValue::ConstIterator HashValue::Find(const char* key) const
+{
+    if(UNORDERED_MAP == this->encoding_)
+    {
+        return this->val_.hash->find(key);
+    }
+    else
+    {
+        //TODO:ziplist
+        throw type_error();
+    }
+}
+//---------------------------------------------------------------------------
+HashValue::ConstIterator HashValue::Find(const String& key) const
+{
+    return Find(key.c_str());
+}
+//---------------------------------------------------------------------------
+size_t HashValue::Count(const char* key) const
 {
     if(UNORDERED_MAP == this->encoding_)
     {
@@ -191,30 +209,16 @@ size_t HashValue::Count(const std::string& key) const
     return 0;
 }
 //---------------------------------------------------------------------------
-StringValuePtr HashValue::FindAsString(const std::string& key) const
+size_t HashValue::Count(const std::string& key) const
 {
-    if(UNORDERED_MAP == this->encoding_)
-    {
-        auto got = this->val_.hash->find(key);
-        if(got == this->val_.hash->end())
-            return StringValue::NullPtr;
-
-        return std::dynamic_pointer_cast<StringValue>(got->second);
-    }
-    else
-    {
-        //TODO:ziplist
-        throw type_error();
-    }
-
-    return StringValue::NullPtr;
+    return Count(key.c_str());
 }
 //---------------------------------------------------------------------------
-bool HashValue::Insert(const std::string& key, const ValuePtr& value)
+bool HashValue::Insert(const std::string& key, const ObjectPtr& value)
 {
     if(UNORDERED_MAP == this->encoding_)
     {
-        std::pair<std::string, ValuePtr> pair(key, value);
+        std::pair<String, ObjectPtr> pair(key, value);
         auto result = this->val_.hash->insert(pair);
         return result.second;
     }
@@ -227,12 +231,100 @@ bool HashValue::Insert(const std::string& key, const ValuePtr& value)
     return false;
 }
 //---------------------------------------------------------------------------
-bool HashValue::Insert(std::string&& key, ValuePtr&& value)
+bool HashValue::Insert(std::string&& key, ObjectPtr&& value)
 {
     if(UNORDERED_MAP == this->encoding_)
     {
-        auto pair = std::make_pair<std::string, ValuePtr>(std::move(key), std::move(value));
+        auto pair = std::make_pair<std::string, ObjectPtr>(std::move(key), std::move(value));
+        auto result = this->val_.hash->insert(std::move(pair));
+        return result.second;
+    }
+    else
+    {
+        //TODO:ziplist
+        throw type_error();
+    }
+
+    return false;
+}
+//---------------------------------------------------------------------------
+bool HashValue::Insert(const std::string& key, String& val)
+{
+    if(UNORDERED_MAP == this->encoding_)
+    {
+        std::pair<String, ObjectPtr> pair(key, new StringValue(val));
         auto result = this->val_.hash->insert(pair);
+        return result.second;
+    }
+    else
+    {
+        //TODO:ziplist
+        throw type_error();
+    }
+
+    return false;
+}
+//---------------------------------------------------------------------------
+bool HashValue::Insert(std::string&& key, String&& val)
+{
+    if(UNORDERED_MAP == this->encoding_)
+    {
+        auto pair = std::make_pair<std::string, ObjectPtr>(std::move(key), ObjectPtr(new StringValue(val)));
+        auto result = this->val_.hash->insert(std::move(pair));
+        return result.second;
+    }
+    else
+    {
+        //TODO:ziplist
+        throw type_error();
+    }
+
+    return false;
+}
+//---------------------------------------------------------------------------
+bool HashValue::Insert(std::string& key, int32_t val)
+{
+    return Insert(key, static_cast<int64_t>(val));
+}
+//---------------------------------------------------------------------------
+bool HashValue::Insert(std::string&& key, int32_t val)
+{
+    return Insert(key, static_cast<int64_t>(val));
+}
+//---------------------------------------------------------------------------
+bool HashValue::Insert(std::string& key, int64_t val)
+{
+    return Insert(String(key), val);
+}
+//---------------------------------------------------------------------------
+bool HashValue::Insert(std::string&& key, int64_t val)
+{
+    if(UNORDERED_MAP == this->encoding_)
+    {
+        auto pair = std::make_pair<std::string, ObjectPtr>(std::move(key), ObjectPtr(new StringValue(val)));
+        auto result = this->val_.hash->insert(std::move(pair));
+        return result.second;
+    }
+    else
+    {
+        //TODO:ziplist
+        throw type_error();
+    }
+
+    return false;
+}
+//---------------------------------------------------------------------------
+bool HashValue::Insert(std::string& key, double val)
+{
+    return Insert(String(key), val);
+}
+//---------------------------------------------------------------------------
+bool HashValue::Insert(std::string&& key, double val)
+{
+    if(UNORDERED_MAP == this->encoding_)
+    {
+        auto pair = std::make_pair<std::string, ObjectPtr>(std::move(key), ObjectPtr(new StringValue(val)));
+        auto result = this->val_.hash->insert(std::move(pair));
         return result.second;
     }
     else
@@ -272,11 +364,6 @@ void HashValue::Clear()
     }
 
     return;
-}
-//---------------------------------------------------------------------------
-HashValuePtr HashValue::AsHashPtr(ValuePtr value)
-{
-    return std::dynamic_pointer_cast<HashValue>(value);
 }
 //---------------------------------------------------------------------------
 

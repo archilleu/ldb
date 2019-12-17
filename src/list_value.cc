@@ -1,5 +1,7 @@
 //---------------------------------------------------------------------------
 #include "list_value.h"
+#include "object_ptr.h"
+#include "string_value.h"
 //---------------------------------------------------------------------------
 namespace db
 {
@@ -156,7 +158,7 @@ ListValue::ReverseConstIterator ListValue::REnd() const
     throw type_error();
 }
 //---------------------------------------------------------------------------
-ValuePtr& ListValue::Front()
+ObjectPtr& ListValue::Front()
 {
     if(LINKED_LIST == this->encoding_)
     {
@@ -170,7 +172,7 @@ ValuePtr& ListValue::Front()
     throw type_error();
 }
 //---------------------------------------------------------------------------
-const ValuePtr& ListValue::Front() const
+const ObjectPtr& ListValue::Front() const
 {
     if(LINKED_LIST == this->encoding_)
     {
@@ -184,7 +186,7 @@ const ValuePtr& ListValue::Front() const
     throw type_error();
 }
 //---------------------------------------------------------------------------
-ValuePtr& ListValue::Back()
+ObjectPtr& ListValue::Back()
 {
     if(LINKED_LIST == this->encoding_)
     {
@@ -198,7 +200,7 @@ ValuePtr& ListValue::Back()
     throw type_error();
 }
 //---------------------------------------------------------------------------
-const ValuePtr& ListValue::Back() const
+const ObjectPtr& ListValue::Back() const
 {
     if(LINKED_LIST == this->encoding_)
     {
@@ -212,11 +214,76 @@ const ValuePtr& ListValue::Back() const
     throw type_error();
 }
 //---------------------------------------------------------------------------
-void ListValue::PushFront(const ValuePtr& value)
+void ListValue::PushFront(const ObjectPtr& value)
+{
+    PushFront(ObjectPtr(value));
+}
+//---------------------------------------------------------------------------
+void ListValue::PushFront(const ObjectPtr&& value)
 {
     if(LINKED_LIST == this->encoding_)
     {
         this->val_.linked_list->push_back(value);
+        return;
+    }
+    else
+    {
+        throw type_error();
+    }
+
+    throw type_error();
+}
+//---------------------------------------------------------------------------
+void ListValue::PushFront(const char* value)
+{
+    PushFront(String(value));
+}
+//---------------------------------------------------------------------------
+void ListValue::PushFront(const String& value)
+{
+    PushFront(String(value));
+}
+//---------------------------------------------------------------------------
+void ListValue::PushFront(String&& value)
+{
+    if(LINKED_LIST == this->encoding_)
+    {
+        this->val_.linked_list->push_back(ObjectPtr(new StringValue(value)));
+        return;
+    }
+    else
+    {
+        throw type_error();
+    }
+
+    throw type_error();
+}
+//---------------------------------------------------------------------------
+void ListValue::PushFront(int32_t value)
+{
+    PushFront(static_cast<int64_t>(value));
+}
+//---------------------------------------------------------------------------
+void ListValue::PushFront(int64_t value)
+{
+    if(LINKED_LIST == this->encoding_)
+    {
+        this->val_.linked_list->push_back(ObjectPtr(new StringValue(value)));
+        return;
+    }
+    else
+    {
+        throw type_error();
+    }
+
+    throw type_error();
+}
+//---------------------------------------------------------------------------
+void ListValue::PushFront(double value)
+{
+    if(LINKED_LIST == this->encoding_)
+    {
+        this->val_.linked_list->push_back(ObjectPtr(new StringValue(value)));
         return;
     }
     else
@@ -242,11 +309,76 @@ void ListValue::PopFront()
     throw type_error();
 }
 //---------------------------------------------------------------------------
-void ListValue::PushBack(const ValuePtr& value)
+void ListValue::PushBack(const ObjectPtr& value)
+{
+    PushFront(ObjectPtr(value));
+}
+//---------------------------------------------------------------------------
+void ListValue::PushBack(const ObjectPtr&& value)
 {
     if(LINKED_LIST == this->encoding_)
     {
         this->val_.linked_list->push_back(value);
+        return;
+    }
+    else
+    {
+        throw type_error();
+    }
+
+    throw type_error();
+}
+//---------------------------------------------------------------------------
+void ListValue::PushBack(const char* value)
+{
+    PushFront(String(value));
+}
+//---------------------------------------------------------------------------
+void ListValue::PushBack(const String& value)
+{
+    PushFront(String(value));
+}
+//---------------------------------------------------------------------------
+void ListValue::PushBack(String&& value)
+{
+    if(LINKED_LIST == this->encoding_)
+    {
+        this->val_.linked_list->push_back(ObjectPtr(new StringValue(value)));
+        return;
+    }
+    else
+    {
+        throw type_error();
+    }
+
+    throw type_error();
+}
+//---------------------------------------------------------------------------
+void ListValue::PushBack(int32_t value)
+{
+    PushFront(static_cast<int64_t>(value));
+}
+//---------------------------------------------------------------------------
+void ListValue::PushBack(int64_t value)
+{
+    if(LINKED_LIST == this->encoding_)
+    {
+        this->val_.linked_list->push_back(ObjectPtr(new StringValue(value)));
+        return;
+    }
+    else
+    {
+        throw type_error();
+    }
+
+    throw type_error();
+}
+//---------------------------------------------------------------------------
+void ListValue::PushBack(double value)
+{
+    if(LINKED_LIST == this->encoding_)
+    {
+        this->val_.linked_list->push_back(ObjectPtr(new StringValue(value)));
         return;
     }
     else
@@ -272,11 +404,73 @@ void ListValue::PopBack()
     throw type_error();
 }
 //---------------------------------------------------------------------------
-ListValue::Iterator ListValue::Insert(ConstIterator position, const ValuePtr& val)
+ListValue::Iterator ListValue::Insert(ConstIterator position, const ObjectPtr& value)
+{
+    return Insert(position, ObjectPtr(value));
+}
+//---------------------------------------------------------------------------
+ListValue::Iterator ListValue::Insert(ConstIterator position, const ObjectPtr&& value)
 {
     if(LINKED_LIST == this->encoding_)
     {
-        return this->val_.linked_list->insert(position, val);
+        return this->val_.linked_list->insert(position, std::move(value));
+    }
+    else
+    {
+        throw type_error();
+    }
+
+    throw type_error();
+}
+//---------------------------------------------------------------------------
+ListValue::Iterator ListValue::Insert(ConstIterator position, const char* value)
+{
+    return Insert(position, String(value));
+}
+//---------------------------------------------------------------------------
+ListValue::Iterator ListValue::Insert(ConstIterator position, const String& value)
+{
+    return Insert(position, String(value));
+}
+//---------------------------------------------------------------------------
+ListValue::Iterator ListValue::Insert(ConstIterator position, String&& value)
+{
+    if(LINKED_LIST == this->encoding_)
+    {
+        return this->val_.linked_list->insert(position, ObjectPtr(new StringValue(value)));
+    }
+    else
+    {
+        throw type_error();
+    }
+
+    throw type_error();
+}
+//---------------------------------------------------------------------------
+ListValue::Iterator ListValue::Insert(ConstIterator position, int32_t value)
+{
+    return Insert(position, static_cast<int64_t>(value));
+}
+//---------------------------------------------------------------------------
+ListValue::Iterator ListValue::Insert(ConstIterator position, int64_t value)
+{
+    if(LINKED_LIST == this->encoding_)
+    {
+        return this->val_.linked_list->insert(position, ObjectPtr(new StringValue(value)));
+    }
+    else
+    {
+        throw type_error();
+    }
+
+    throw type_error();
+}
+//---------------------------------------------------------------------------
+ListValue::Iterator ListValue::Insert(ConstIterator position, double value)
+{
+    if(LINKED_LIST == this->encoding_)
+    {
+        return this->val_.linked_list->insert(position, ObjectPtr(new StringValue(value)));
     }
     else
     {
@@ -327,11 +521,6 @@ void ListValue::Clear()
     }
 
     throw type_error();
-}
-//---------------------------------------------------------------------------
-ListValuePtr ListValue::AsListPtr(ValuePtr value)
-{
-    return std::dynamic_pointer_cast<ListValue>(value);
 }
 //---------------------------------------------------------------------------
 

@@ -140,6 +140,30 @@ int main(int, char**)
     TEST_ASSERT(copy.val() == s1);
     TEST_ASSERT(copy.AsInt() == 0);
     TEST_ASSERT(copy.AsDouble() == 0);
+
+    StringValue v1;
+    StringValue v2;
+    StringValue v3;
+    StringValue v4;
+    StringValue v5;
+
+    v1 = s1;
+    v2 = "char*";
+    v3 = INT_MAX;
+    v4 = LONG_MAX;
+    v5 = 1.0;
+    
+    v1 = 1;
+    v2 = 2;
+    v3 = "3";
+    v4 = "4";
+    v5 = 5;
+
+    TEST_ASSERT(v1.AsInt() == 1);
+    TEST_ASSERT(v2.AsInt() == 2);
+    TEST_ASSERT(v3.val() == "3");
+    TEST_ASSERT(v4.val() == "4");
+    TEST_ASSERT(v5.AsInt() == 5);
     }
     //赋值
     {
