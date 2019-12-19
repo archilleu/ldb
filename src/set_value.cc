@@ -6,8 +6,8 @@ namespace db
 {
 
 //---------------------------------------------------------------------------
-SetValue::SetValue()
-:   Value(SET, UNORDERED_SET)
+SetValue::SetValue(size_t reserve_size)
+:   Value(SET, UNORDERED_SET, reserve_size)
 {
     return;
 }

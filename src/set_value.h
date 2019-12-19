@@ -11,7 +11,7 @@ namespace db
 class SetValue : public Value
 {
 public:
-    SetValue();
+    SetValue(size_t reserve_size=0);
     SetValue(SetValue& other)=default;
     SetValue(SetValue&& other)=default;
     SetValue& operator=(const SetValue& other)=default;
@@ -63,9 +63,9 @@ public:
     bool Erase(int32_t val);
     bool Erase(int64_t val);
     bool Erase(double val);
-
     ConstIterator Erase(ConstIterator position);
     ConstIterator Erase(ConstIterator first, ConstIterator last);
+
     void Clear();
 };
 

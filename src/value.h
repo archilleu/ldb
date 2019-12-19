@@ -70,9 +70,15 @@ public:
     using LinkedList    = std::list<ObjectPtr>;
     using Set           = std::unordered_set<ObjectPtr, HashFunc>;
     using IntSet        = std::vector<uint8_t>;
-    using SortedSet     = std::multimap<double, ObjectPtr>;
     using Hash          = std::unordered_map<String, ObjectPtr>;
     using ZipList       = std::vector<uint8_t>;
+    using Multimap      = std::multimap<double, ObjectPtr>;
+    
+    struct SortedSet
+    {
+        Multimap list;
+        std::unordered_map<ObjectPtr, double> map;
+    };
 
 protected:
     Value(Type type, Encoding encoding, size_t reserve_size=0);
