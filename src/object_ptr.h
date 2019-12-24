@@ -10,11 +10,13 @@ namespace db
 class Value;
 class StringValue;
 class SetValue;
+class ZSetValue;
 class HashValue;
 class ListValue;
 using ValuePtr = std::shared_ptr<Value>;
 using StringValuePtr = std::shared_ptr<StringValue>;
 using SetValuePtr = std::shared_ptr<SetValue>;
+using ZSetValuePtr = std::shared_ptr<ZSetValue>;
 using HashValuePtr = std::shared_ptr<HashValue>;
 using ListValuePtr = std::shared_ptr<ListValue>;
 //---------------------------------------------------------------------------
@@ -34,6 +36,7 @@ public:
     HashValuePtr AsHashPtr() const;
     ListValuePtr AsListPtr() const;
     SetValuePtr AsSetPtr() const;
+    ZSetValuePtr AsZSetPtr() const;
 
     std::string ToString() const;
 

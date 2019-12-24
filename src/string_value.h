@@ -32,10 +32,14 @@ public:
     StringValue& operator=(const double value);
 
 public:
-    const std::string& val();
+    const char* val() const;
 
-    int64_t AsInt();
-    double AsDouble();
+    std::string AsString() const;
+    int64_t AsInt() const;
+    double AsDouble() const;
+
+private:
+    bool IsNumber(const char* value, size_t len) const;
 };
 
 }//namespace db

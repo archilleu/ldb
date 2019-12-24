@@ -5,6 +5,7 @@
 #include "object_ptr.h"
 #include "string_value.h"
 #include "set_value.h"
+#include "zset_value.h"
 #include "hash_value.h"
 #include "list_value.h"
 //---------------------------------------------------------------------------
@@ -40,6 +41,11 @@ ListValuePtr ObjectPtr::AsListPtr() const
 SetValuePtr ObjectPtr::AsSetPtr() const
 {
     return std::dynamic_pointer_cast<SetValue>(object_);
+}
+//---------------------------------------------------------------------------
+ZSetValuePtr ObjectPtr::AsZSetPtr() const
+{
+    return std::dynamic_pointer_cast<ZSetValue>(object_);
 }
 //---------------------------------------------------------------------------
 std::string ObjectPtr::ToString() const

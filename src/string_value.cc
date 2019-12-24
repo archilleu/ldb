@@ -1,9 +1,13 @@
 //---------------------------------------------------------------------------
+#include <cctype>
+#include <cstring>
 #include "string_value.h"
 //---------------------------------------------------------------------------
 namespace db
 {
 
+//---------------------------------------------------------------------------
+thread_local char t_cache_val[21];
 //---------------------------------------------------------------------------
 StringValue::StringValue()
 :   Value(STRING, INT)
@@ -12,23 +16,59 @@ StringValue::StringValue()
 }
 //---------------------------------------------------------------------------
 StringValue::StringValue(const char* str)
-:   Value(STRING, RAW)
+:   Value(STRING)
 {
-    this->val_.string->assign(str);
+    if(IsNumber(str, strlen(str)))
+    {
+        this->encoding_ = INT;
+        this->InitPayload(0);
+        this->val_.string = reinterpret_cast<String*>(::atoll(str));
+    }
+    else
+    {
+        this->encoding_ = RAW;
+        this->InitPayload(0);
+        this->val_.string->assign(str);
+    }
+
     return;
 }
 //---------------------------------------------------------------------------
 StringValue::StringValue(const char* ptr, size_t len)
-:   Value(STRING, RAW)
+:   Value(STRING)
 {
-    this->val_.string->assign(ptr, len);
+    if(IsNumber(ptr, len))
+    {
+        this->encoding_ = INT;
+        this->InitPayload(0);
+        this->val_.string = reinterpret_cast<String*>(::atoll(String(ptr, len).c_str()));
+    }
+    else
+    {
+        this->encoding_ = RAW;
+        this->InitPayload(0);
+        this->val_.string->assign(ptr, len);
+    }
+
     return;
 }
 //---------------------------------------------------------------------------
 StringValue::StringValue(const std::string& str)
-:   Value(STRING, RAW)
+:   Value(STRING)
 {
-    this->val_.string->assign(str);
+    if(IsNumber(str.c_str(), str.length()))
+    {
+        this->encoding_ = INT;
+        this->InitPayload(0);
+        this->val_.string = reinterpret_cast<String*>(::atoll(str.c_str()));
+    }
+    else
+    {
+        this->encoding_ = RAW;
+        this->InitPayload(0);
+        this->val_.string->assign(str);
+    }
+
     return;
 }
 //---------------------------------------------------------------------------
@@ -128,22 +168,32 @@ StringValue& StringValue::operator=(const double value)
     return *this;
 }
 //---------------------------------------------------------------------------
-const std::string& StringValue::val()
+const char* StringValue::val() const
 {
-    //如果是INT编码，则转换为RAW编码，因为返回值是字符串引用，INT内部没有空间
     if(INT == this->encoding_)
     {
-        this->encoding_ = Value::Encoding::RAW;
-        if(0 == this->val_.string)
-            this->val_.string = new String();
-        else
-            this->val_.string = new String(std::to_string(reinterpret_cast<int64_t>(this->val_.string)));
+        snprintf(t_cache_val, sizeof(t_cache_val), "%ld", reinterpret_cast<int64_t>(this->val_.string));
+        return t_cache_val;
     }
-
-    return *(this->val_.string);
+    else
+    {
+        return this->val_.string->c_str();
+    }
 }
 //---------------------------------------------------------------------------
-int64_t StringValue::AsInt()
+std::string StringValue::AsString() const
+{
+    if(INT == this->encoding_)
+    {
+       return std::to_string(reinterpret_cast<int64_t>(this->val_.string));
+    }
+    else
+    {
+        return *(this->val_.string);
+    }
+}
+//---------------------------------------------------------------------------
+int64_t StringValue::AsInt() const
 {
     if(INT == this->encoding_)
     {
@@ -163,12 +213,12 @@ int64_t StringValue::AsInt()
     }
 }
 //---------------------------------------------------------------------------
-double StringValue::AsDouble()
+double StringValue::AsDouble() const
 {
     //无参构造函数
     if(INT == this->encoding_)
     {
-        return 0;
+        return static_cast<double>(reinterpret_cast<int64_t>(this->val_.string));
     }
 
     if(this->val_.string->empty())
@@ -182,6 +232,17 @@ double StringValue::AsDouble()
     {
         return 0;
     }
+}
+//---------------------------------------------------------------------------
+bool StringValue::IsNumber(const char* value, size_t len) const
+{
+    for(size_t i=0; i<len; i++)
+    {
+        if(!isdigit(value[i]))
+            return false;
+    }
+
+    return true;
 }
 //---------------------------------------------------------------------------
 

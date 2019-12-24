@@ -123,8 +123,8 @@ int main(int, char**)
 
     TEST_ASSERT(set.End() == set.Find(""));
     TEST_ASSERT(op1 == *set.Find(op1));
-    TEST_ASSERT(op2 == set.Find(op2)->AsStringPtr()->val());
-    TEST_ASSERT(op3 == set.Find(op3)->AsStringPtr()->val());
+    TEST_ASSERT(std::string(op2) == set.Find(op2)->AsStringPtr()->val());
+    TEST_ASSERT(std::string(op3) == set.Find(op3)->AsStringPtr()->val());
     TEST_ASSERT(op4 == set.Find(op4)->AsStringPtr()->AsInt());
     TEST_ASSERT(op5 == set.Find(op5)->AsStringPtr()->AsInt());
     TEST_ASSERT(op6 == set.Find(op6)->AsStringPtr()->AsDouble());

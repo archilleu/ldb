@@ -49,6 +49,14 @@ size_t Value::HashFunc::operator()(const ObjectPtr& value) const
     return 0;
 }
 //---------------------------------------------------------------------------
+Value::Value(Type type)
+{
+    type_ = type;
+    lru_ = base::Timestamp::Now();
+
+    return;
+}
+//---------------------------------------------------------------------------
 Value::Value(Type type, Encoding encoding, size_t reserve_size)
 {
     type_ = type;
@@ -203,7 +211,10 @@ bool Value::operator==(const Value& other) const
 
         case ZSET:
         {
-            return *val_.sorted_set == *other.val_.sorted_set;
+            return (val_.sorted_set->list == other.val_.sorted_set->list
+                    &&
+                    val_.sorted_set->map == other.val_.sorted_set->map
+                   );
         }
 
         default:

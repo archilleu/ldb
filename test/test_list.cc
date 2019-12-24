@@ -99,11 +99,11 @@ int main(int, char**)
     {
     ListValue list;
     list.PushBack(ObjectPtr(new StringValue("a")));
-    TEST_ASSERT("a" == list.Front().AsStringPtr()->val());
+    TEST_ASSERT(std::string("a") == list.Front().AsStringPtr()->val());
     *list.Front().AsStringPtr() = "b";
-    TEST_ASSERT("b" == list.Front().AsStringPtr()->val());
+    TEST_ASSERT(std::string("b") == list.Front().AsStringPtr()->val());
     *list.Back().AsStringPtr() = "a";
-    TEST_ASSERT("a" == list.Back().AsStringPtr()->val());
+    TEST_ASSERT(std::string("a") == list.Back().AsStringPtr()->val());
     }
 
     //push pop front

@@ -72,15 +72,17 @@ public:
     using IntSet        = std::vector<uint8_t>;
     using Hash          = std::unordered_map<String, ObjectPtr>;
     using ZipList       = std::vector<uint8_t>;
-    using Multimap      = std::multimap<double, ObjectPtr>;
+    using ScoreObjMap   = std::multimap<double, ObjectPtr>;
+    using ObjScoreMap   = std::unordered_map<ObjectPtr, double, HashFunc>;
     
     struct SortedSet
     {
-        Multimap list;
-        std::unordered_map<ObjectPtr, double> map;
+        ScoreObjMap list;
+        ObjScoreMap map;
     };
 
 protected:
+    Value(Type type);
     Value(Type type, Encoding encoding, size_t reserve_size=0);
     Value(const Value& other);
     Value(Value&& other);
@@ -102,8 +104,10 @@ public:
 public:
     friend class ObjectPtr;
 
-private:
+protected:
     void InitPayload(size_t reserve_size);
+
+private:
     void DupPayload(const Value& other);
     void ReleasePayload();
 
@@ -136,10 +140,6 @@ public:
 //---------------------------------------------------------------------------
 bool operator==(const ObjectPtr& left, const ObjectPtr& right);
 bool operator!=(const ObjectPtr& left, const ObjectPtr& right);
-//---------------------------------------------------------------------------
-//operator overload
-//std::ostream& operator<<(std::ostream& out, const Value& val);
-
 }//namespace db
 //---------------------------------------------------------------------------
 #endif //DB_VALUE_H_

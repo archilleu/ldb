@@ -15,7 +15,7 @@ int main(int, char**)
     StringValue str;
     TEST_ASSERT(str.type() == Value::STRING);
     TEST_ASSERT(str.encoding() == Value::INT);
-    TEST_ASSERT(str.val() == "");
+    TEST_ASSERT(0 == strcmp(str.val(), "0"));
     TEST_ASSERT(str.AsInt() == 0);
     TEST_ASSERT(str.AsDouble() == 0);
     }
@@ -26,7 +26,7 @@ int main(int, char**)
     StringValue str(s);
     TEST_ASSERT(str.type() == Value::STRING);
     TEST_ASSERT(str.encoding() == Value::RAW);
-    TEST_ASSERT(str.val() == s);
+    TEST_ASSERT(str.val() == std::string(s));
     TEST_ASSERT(str.AsInt() == 0);
     TEST_ASSERT(str.AsDouble() == 0);
     }
@@ -37,7 +37,7 @@ int main(int, char**)
     StringValue str(s, strlen(s));
     TEST_ASSERT(str.type() == Value::STRING);
     TEST_ASSERT(str.encoding() == Value::RAW);
-    TEST_ASSERT(str.val() == s);
+    TEST_ASSERT(str.val() == std::string(s));
     TEST_ASSERT(str.AsInt() == 0);
     TEST_ASSERT(str.AsDouble() == 0);
     }
@@ -97,12 +97,12 @@ int main(int, char**)
 
     TEST_ASSERT(copy.type() == val.type());
     TEST_ASSERT(copy.encoding() == val.encoding());
-    TEST_ASSERT(copy.val() == val.val());
+    TEST_ASSERT(0 == std::strcmp(copy.val(), val.val()));
     TEST_ASSERT(copy.AsInt() == val.AsInt());
     TEST_ASSERT(copy.AsDouble() == val.AsDouble());
     TEST_ASSERT(copy1.type() == val.type());
     TEST_ASSERT(copy1.encoding() == val.encoding());
-    TEST_ASSERT(copy1.val() == val.val());
+    TEST_ASSERT(std::string(copy1.val()) == val.val());
     TEST_ASSERT(copy1.AsInt() == val.AsInt());
     TEST_ASSERT(copy1.AsDouble() == val.AsDouble());
     }
@@ -161,8 +161,8 @@ int main(int, char**)
 
     TEST_ASSERT(v1.AsInt() == 1);
     TEST_ASSERT(v2.AsInt() == 2);
-    TEST_ASSERT(v3.val() == "3");
-    TEST_ASSERT(v4.val() == "4");
+    TEST_ASSERT(0 == strcmp(v3.val(),"3"));
+    TEST_ASSERT(0 == strcmp(v4.val(), "4"));
     TEST_ASSERT(v5.AsInt() == 5);
     }
     //赋值
@@ -188,8 +188,8 @@ int main(int, char**)
     val2 = val1;
 
     TEST_ASSERT(val2.type() == Value::STRING);
-    TEST_ASSERT(val2.encoding() == Value::RAW);
-    TEST_ASSERT(val2.val() == i1);
+    TEST_ASSERT(val2.encoding() == Value::INT);
+    TEST_ASSERT(0==std::strcmp(val2.val(), i1));
     TEST_ASSERT(val2.AsInt() == std::atoi(i1));
     TEST_ASSERT(val2.AsDouble() == std::atof(i1));
     }
@@ -202,8 +202,8 @@ int main(int, char**)
     val2 = std::move(val1);
 
     TEST_ASSERT(val2.type() == Value::STRING);
-    TEST_ASSERT(val2.encoding() == Value::RAW);
-    TEST_ASSERT(val2.val() == i1);
+    TEST_ASSERT(val2.encoding() == Value::INT);
+    TEST_ASSERT(0==std::strcmp(val2.val(), i1));
     TEST_ASSERT(val2.AsInt() == std::atoi(i1));
     TEST_ASSERT(val2.AsDouble() == std::atof(i1));
 
@@ -230,7 +230,7 @@ int main(int, char**)
 
     TEST_ASSERT(v1.type() == Value::STRING);
     TEST_ASSERT(v1.encoding() == Value::RAW);
-    TEST_ASSERT(v1.val() == s1);
+    TEST_ASSERT(0==std::strcmp(v1.val(), s1));
     TEST_ASSERT(v1.AsInt() == 0);
     TEST_ASSERT(v1.AsDouble() == 0);
 
@@ -269,10 +269,10 @@ int main(int, char**)
 
     TEST_ASSERT(str1.type() == Value::STRING);
     TEST_ASSERT(str1.encoding() == Value::RAW);
-    TEST_ASSERT(str1.val() == s2);
+    TEST_ASSERT(0==std::strcmp(str1.val(), s2));
     TEST_ASSERT(str2.type() == Value::STRING);
     TEST_ASSERT(str2.encoding() == Value::RAW);
-    TEST_ASSERT(str2.val() == s1);
+    TEST_ASSERT(0==std::strcmp(str2.val(), s1));
     }
 
     return 0;
