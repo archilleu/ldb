@@ -101,6 +101,8 @@ public:
     Encoding encoding() const { return encoding_; }
     base::Timestamp lru() const { return lru_; }
 
+    std::string ToString() const;
+
 public:
     friend class ObjectPtr;
 
@@ -110,6 +112,12 @@ protected:
 private:
     void DupPayload(const Value& other);
     void ReleasePayload();
+
+    std::string AddTabs(int deep) const;
+    std::string ToString(int deep) const;
+
+    template<typename T> std::string UnaryContainerToString(const T& val, int deep) const;
+    template<typename T> std::string BinaryContainerToString(const T& val, int deep) const;
 
 protected:
     Type type_;                     //类型

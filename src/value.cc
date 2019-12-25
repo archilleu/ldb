@@ -1,5 +1,11 @@
 //---------------------------------------------------------------------------
+#include <sstream>
 #include "value.h"
+#include "string_value.h"
+#include "set_value.h"
+#include "zset_value.h"
+#include "hash_value.h"
+#include "list_value.h"
 //---------------------------------------------------------------------------
 namespace db
 {
@@ -231,6 +237,11 @@ void Value::Swap(Value& other)
     std::swap(this->lru_, other.lru_);
 }
 //---------------------------------------------------------------------------
+std::string Value::ToString() const
+{
+    return ToString(0);
+}
+//---------------------------------------------------------------------------
 void Value::InitPayload(size_t reserve_size)
 {
     switch(type_)
@@ -333,6 +344,116 @@ void Value::InitPayload(size_t reserve_size)
     }
     
     return;
+}
+//---------------------------------------------------------------------------
+std::string Value::AddTabs(int deep) const
+{
+    std::string str;
+    for(int i=0; i<deep; i++)
+        str += "\t";
+
+    return str;
+}
+//---------------------------------------------------------------------------
+std::string Value::ToString(int deep) const
+{
+    std::stringstream ss;
+    switch(type_)
+    {
+        case Value::LIST:   ss << AddTabs(deep); ss << "[" << std::endl; break;
+        case Value::SET:
+        case Value::ZSET:   ss << AddTabs(deep); ss << "(" << std::endl; break;
+        case Value::HASH:   ss << AddTabs(deep); ss << "{" << std::endl; break;
+        case Value::STRING:
+        case Value::BINARY:
+        default:break;
+    }
+
+    switch(type_)
+    {
+        case Value::STRING:    ss << "\"" << dynamic_cast<StringValue*>(const_cast<Value*>(this))->val() << "\""; break;
+        //case Value::BINARY:    ss << "x\'" << base::BinToString(val_.binary->data(), val_.binary->size()) << "\'"; break;
+        case Value::LIST:   ss << UnaryContainerToString(dynamic_cast<ListValue*>(const_cast<Value*>(this)), deep+1); break;
+        case Value::SET:    ss << UnaryContainerToString(dynamic_cast<SetValue*>(const_cast<Value*>(this)), deep+1); break;
+        case Value::ZSET:   ss << BinaryContainerToString(dynamic_cast<ZSetValue*>(const_cast<Value*>(this)), deep+1); break;
+        case Value::HASH:   ss << BinaryContainerToString(dynamic_cast<HashValue*>(const_cast<Value*>(this)), deep+1); break;
+        default:break;
+    }
+
+    ss << std::endl;
+    switch(type_)
+    {
+        case Value::LIST:   ss << AddTabs(deep); ss << "]"; break;
+        case Value::SET:
+        case Value::ZSET:   ss << AddTabs(deep); ss << ")"; break;
+        case Value::HASH:   ss << AddTabs(deep); ss << "}"; break;
+        case Value::STRING:
+        case Value::BINARY:
+        default:break;
+    }
+
+    return ss.str();
+}
+//---------------------------------------------------------------------------
+template<typename T>
+std::string Value::UnaryContainerToString(const T& val, int deep) const
+{
+    std::stringstream ss;
+    for(auto it=val->Begin(); it!=val->End(); it++)
+    {
+        switch(it->object()->type())
+        {
+            case Value::STRING: ss << AddTabs(deep) << "\"" << it->AsStringPtr()->val() << "\""; break;
+            case Value::BINARY: ss << "x\'" << "\'"; break;
+            case Value::LIST:
+            case Value::SET:
+            case Value::ZSET:
+            case Value::HASH:   ss << it->object()->ToString(deep); break;
+        }
+
+        ss << "," << std::endl;
+    }
+
+    std::string str = ss.str();
+    if(2 <= str.size())
+    {
+        str.pop_back();
+        str.pop_back();
+    }
+
+    return str;
+}
+//---------------------------------------------------------------------------
+template<typename T>
+std::string Value::BinaryContainerToString(const T& val, int deep) const
+{
+    std::stringstream ss;
+    for(auto it=val->Begin(); it!=val->End(); it++)
+    {
+        ss << AddTabs(deep);
+        ss << it->first << ": ";
+
+        switch(it->second.object()->type())
+        {
+            case Value::STRING: ss << "\"" << it->second.AsStringPtr()->val() << "\""; break;
+            case Value::BINARY: ss << "x\'" << "\'"; break;
+            case Value::LIST:
+            case Value::SET:
+            case Value::ZSET:
+            case Value::HASH:   ss << it->second.object()->ToString(deep); break;
+        }
+
+        ss << "," << std::endl;
+    }
+
+    std::string str = ss.str();
+    if(2 <= str.size())
+    {
+        str.pop_back();
+        str.pop_back();
+    }
+
+    return str;
 }
 //---------------------------------------------------------------------------
 void Value::DupPayload(const Value& other)

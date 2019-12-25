@@ -7,6 +7,7 @@
 namespace db
 {
 
+//---------------------------------------------------------------------------
 class Value;
 class StringValue;
 class SetValue;
@@ -39,13 +40,6 @@ public:
     ZSetValuePtr AsZSetPtr() const;
 
     std::string ToString() const;
-
-private:
-    std::string AddTabs(int deep) const;
-    std::string ToString(int deep) const;
-
-    template<typename T> std::string UnaryContainerToString(const T& val, int deep) const;
-    template<typename T> std::string BinaryContainerToString(const T& val, int deep) const;
 
 private:
     ValuePtr object_;
