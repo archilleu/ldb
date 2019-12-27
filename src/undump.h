@@ -8,6 +8,9 @@
  */
 //---------------------------------------------------------------------------
 #include "../thirdpart/base/include/file_helper.h"
+
+#include "object_ptr.h"
+#include "server.h"
 //---------------------------------------------------------------------------
 namespace db
 {
@@ -17,12 +20,12 @@ class HashValue;
 class Undump
 {
 public:
-    Undump();
+    Undump(Server& server);
     Undump(const Undump&) =delete;
-    Undump operator=(const Undump&) =delete;
+    Undump& operator=(const Undump&) =delete;
 
-    bool Load(const std::string& path, std::vector<HashValue>* dbs);
-    bool ToBin(const std::string& path, std::vector<HashValue>* dbs);
+public:
+    bool Load(const std::string& path);
 
 private:
     void Read(size_t len);
@@ -30,7 +33,6 @@ private:
     uint32_t ReadSize();
     double ReadScore();
     int64_t ReadInt();
-    void ReadKey();
 
     bool CheckIdName();
     bool CheckVersion();
@@ -39,15 +41,17 @@ private:
 
     void MakeSureSize(size_t size);
 
+    void Load();
+    void LoadKeyValuePair(uint8_t type, HashValue& hash);
+    std::string LoadKey();
+    ObjectPtr LoadValue(uint8_t type);
+    ObjectPtr LoadValueString();
+
 private:
+    Server& server_;
     base::FileHelper file_;
     std::vector<char> buffer_;
     int64_t checksum_;
-
-private:
-    const static char kIDNAME[3];
-    const static char kVERSION[4];
-    const static uint8_t kEOF;
 };
 
 

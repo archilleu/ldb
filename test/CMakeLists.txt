@@ -26,6 +26,10 @@ add_executable(${TEST_zset} ${TEST_files} test_zset.cc)
 
 set(TEST_object test_object)
 add_executable(${TEST_object} ${TEST_files} test_object.cc)
+
+set(TEST_ldb test_ldb)
+add_executable(${TEST_ldb} ${TEST_files} ../src/dump.cc ../src/undump.cc
+    ../src/server.cc test_ldb.cc)
 #---------------------------------------------------------------------------
 #add link lib
 find_library(LIBBASE base HINTS ${CMAKE_CURRENT_SOURCE_DIR}/../thirdpart/base/lib)
@@ -38,6 +42,7 @@ target_link_libraries(${TEST_list} ${LIBBASE} pthread )
 target_link_libraries(${TEST_set} ${LIBBASE} pthread )
 target_link_libraries(${TEST_zset} ${LIBBASE} pthread )
 target_link_libraries(${TEST_object} ${LIBBASE} pthread )
+target_link_libraries(${TEST_ldb} ${LIBBASE} pthread )
 #---------------------------------------------------------------------------
 #add test
 add_test(${TEST_string} ${EXECUTABLE_OUTPUT_PATH}/${TEST_string})
@@ -46,4 +51,5 @@ add_test(${TEST_list} ${EXECUTABLE_OUTPUT_PATH}/${TEST_list})
 add_test(${TEST_set} ${EXECUTABLE_OUTPUT_PATH}/${TEST_set})
 add_test(${TEST_zset} ${EXECUTABLE_OUTPUT_PATH}/${TEST_zset})
 add_test(${TEST_object} ${EXECUTABLE_OUTPUT_PATH}/${TEST_object})
+add_test(${TEST_ldb} ${EXECUTABLE_OUTPUT_PATH}/${TEST_ldb})
 #---------------------------------------------------------------------------

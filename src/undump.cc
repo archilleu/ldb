@@ -1,26 +1,33 @@
 //---------------------------------------------------------------------------
+#include <cassert>
+//TODO:del
+#include <iostream>
+
+#include "defines.h"
 #include "undump.h"
 #include "../thirdpart/base/include/function.h"
 #include "../thirdpart/base/include/crc64.h"
+
+#include "object_ptr.h"
+#include "string_value.h"
 #include "hash_value.h"
+#include "list_value.h"
+#include "set_value.h"
+#include "zset_value.h"
 //---------------------------------------------------------------------------
 namespace db
 {
 
 //---------------------------------------------------------------------------
-const char Undump::kIDNAME[3] = {'L','D','B'};
-const char Undump::kVERSION[4] = {'0','0','0','1'};
-const uint8_t Undump::kEOF = 0xFF;
-//---------------------------------------------------------------------------
-Undump::Undump()
-:   buffer_(1024*1024),
+Undump::Undump(Server& server)
+:   server_(server),
+    buffer_(1024*1024),
     checksum_(0)
 {
 }
 //---------------------------------------------------------------------------
-bool Undump::Load(const std::string& path, std::vector<HashValue>* dbs)
+bool Undump::Load(const std::string& path)
 {
-    (void)dbs;
     try
     {
         file_.Open(path);
@@ -28,7 +35,8 @@ bool Undump::Load(const std::string& path, std::vector<HashValue>* dbs)
         if(false == CheckIdName())  return false;
         if(false == CheckVersion()) return false;
 
-        //data
+        //load data
+        Load();
         
         if(false == CheckEOF())     return false;
         if(false == CheckChecksum())return false;
@@ -41,14 +49,8 @@ bool Undump::Load(const std::string& path, std::vector<HashValue>* dbs)
         return false;
     }
 
+    std::cout << server_.dbs()[0].ToString() << std::endl;;
     return true;
-}
-//---------------------------------------------------------------------------
-bool Undump::ToBin(const std::string& path, std::vector<HashValue>* dbs)
-{
-    (void)path;
-    (void)dbs;
-    return false;
 }
 //---------------------------------------------------------------------------
 void Undump::Read(size_t len)
@@ -87,14 +89,10 @@ int64_t Undump::ReadInt()
     return *reinterpret_cast<int64_t*>(const_cast<char*>((buffer_.data())));
 }
 //---------------------------------------------------------------------------
-void Undump::ReadKey()
-{
-}
-//---------------------------------------------------------------------------
 bool Undump::CheckIdName()
 {
-    Read(sizeof(kIDNAME));
-    if(0 != memcmp(kIDNAME, buffer_.data(), sizeof(kIDNAME)))
+    Read(sizeof(kLDB_NAME));
+    if(0 != memcmp(kLDB_NAME, buffer_.data(), sizeof(kLDB_NAME)))
         return false;
 
     return true;
@@ -102,8 +100,8 @@ bool Undump::CheckIdName()
 //---------------------------------------------------------------------------
 bool Undump::CheckVersion()
 {
-    Read(sizeof(kVERSION));
-    if(0 != memcmp(kVERSION, buffer_.data(), sizeof(kVERSION)))
+    Read(sizeof(kLDB_VERSION));
+    if(0 != memcmp(kLDB_VERSION, buffer_.data(), sizeof(kLDB_VERSION)))
         return false;
 
     return true;
@@ -111,8 +109,8 @@ bool Undump::CheckVersion()
 //---------------------------------------------------------------------------
 bool Undump::CheckEOF()
 {
-    Read(sizeof(kEOF));
-    if(0 != memcmp(&kEOF, buffer_.data(), sizeof(kEOF)))
+    Read(sizeof(kLDB_EOF));
+    if(0 != memcmp(&kLDB_EOF, buffer_.data(), sizeof(kLDB_EOF)))
         return false;
 
     return true;
@@ -136,6 +134,110 @@ void Undump::MakeSureSize(size_t size)
         buffer_.resize(size *2);
 
     return;
+}
+//---------------------------------------------------------------------------
+void Undump::Load()
+{
+    while(true)
+    {
+        uint8_t type = ReadType();
+        if(kLDB_OPCODE_EXPIRETIME == type)
+        {
+            //TODO:处理过期时间
+        }
+        else if(kLDB_OPCODE_EXPIRETIME == type)
+        {
+            //TODO:处理过期时间
+        }
+
+        //读取kv结束
+        if(kLDB_OPCODE_EOF == type)
+            break;
+
+        //选取数据库
+        if(kLDB_OPCODE_SELECTDB == type) 
+        {
+            uint32_t size = ReadSize();
+            server_.set_cur_db_idx(size);
+            continue;
+        }
+
+        /**
+         * 读入kv
+         */
+        LoadKeyValuePair(type, server_.cur_db());
+    }
+
+    return;
+}
+//---------------------------------------------------------------------------
+void Undump::LoadKeyValuePair(uint8_t type, HashValue& hash)
+{
+    //获取键
+    std::string key = LoadKey();
+
+    //获取值
+    ObjectPtr value = LoadValue(type);
+
+    hash.Insert(std::move(key), std::move(value));
+
+    return;
+}
+//---------------------------------------------------------------------------
+std::string Undump::LoadKey()
+{
+    size_t size = ReadSize();
+    Read(size);
+    std::string key(buffer_.data(), size);
+    return key;
+}
+//---------------------------------------------------------------------------
+ObjectPtr Undump::LoadValue(uint8_t type)
+{
+    switch(type)
+    {
+        case Value::Type::STRING:
+            return LoadValueString();
+
+        case Value::Type::HASH:
+
+        case Value::Type::LIST:
+        case Value::Type::SET:
+        case Value::Type::ZSET:
+
+        default:
+            throw std::runtime_error("read file failed");
+    }
+}
+//---------------------------------------------------------------------------
+ObjectPtr Undump::LoadValueString()
+{
+    /**
+     * |----32bit----|
+     * encode|zip|len|string
+     */
+
+    uint32_t size = ReadSize();
+    //高位32表示INT
+    if(size&0x80000000)
+    {
+        int64_t val = ReadInt();
+        ObjectPtr op = MakeObject<StringValue>(val);
+        return op;
+    }
+    else
+    {
+        //高位31表示压缩
+        if(size&0x40000000)
+        {
+            //TODO:
+        }
+        uint32_t len = (0x3FFFFFFFFF & size);
+        Read(len);
+        std::string val(buffer_.data(), len);
+        ObjectPtr op = MakeObject<StringValue>(std::move(val));
+        return op;
+    }
 }
 //---------------------------------------------------------------------------
 

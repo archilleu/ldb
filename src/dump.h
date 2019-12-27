@@ -7,10 +7,9 @@
  * "LDB"|"0001"|DATA|EOF|CHECKSUM
  */
 //---------------------------------------------------------------------------
-#include <string>
-
 #include "../thirdpart/base/include/file_helper.h"
 
+#include "server.h"
 #include "hash_value.h"
 //---------------------------------------------------------------------------
 namespace db
@@ -19,13 +18,14 @@ namespace db
 class Dump
 {
 public:
-    Dump(const std::vector<HashValue>& val);
+    Dump(Server& server);
     Dump(const Dump&) =delete;
-    Dump operator=(const Dump&) =delete;
+    Dump& operator=(const Dump&) =delete;
 
+public:
     bool Save(const std::string& path);
 
-    std::vector<uint8_t> ToBin();
+    const Server& server() const { return server_; }
 
 private:
     std::string MakeTempFilename() const;
@@ -41,17 +41,18 @@ private:
     void WriteEOF();
     void WriteChecksum();
 
+    void SaveKeyValuePair(const std::string& key, const ObjectPtr& value);
+    void SaveType(const ObjectPtr& value);
+    void SaveKey(const std::string& key);
+    void SaveValue(const ObjectPtr& value);
+    void SaveValueString(const ObjectPtr& value);
+
 private:
     base::FileHelper file_;
     int64_t checksum_;
-    const std::vector<HashValue>& val_;
 
-private:
-    const static char kIDNAME[3];
-    const static char kVERSION[4];
-    const static uint8_t kEOF;
+    Server& server_;
 };
-
 
 }//namespace db
 //---------------------------------------------------------------------------
