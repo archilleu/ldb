@@ -37,6 +37,7 @@ size_t Value::HashFunc::operator()(const ObjectPtr& value) const
             break;
         }
 
+        //除了int或者stirng做key值有意义，其它类型做key值没啥意义。
         case BINARY:
         case HASH:
         case LIST:
